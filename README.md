@@ -1,4 +1,4 @@
-# neufox's GameText+ (v1.0.0)
+# neufox's GameText+
 
 [![SA-MP Version](https://img.shields.io/badge/SA--MP-✓-green.svg)](https://www.sa-mp.mp/)
 [![open.mp](https://img.shields.io/badge/open.mp-✔-green.svg)](https://www.open.mp/)
