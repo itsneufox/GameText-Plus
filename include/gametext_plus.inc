@@ -97,7 +97,7 @@ native BAD_GameTextForAll(const string[], time, style) = GameTextForAll;
  */
 static stock GameTextEx(playerid)
 {
-    if(playerid == INVALID_PLAYER_ID)
+    if (playerid == INVALID_PLAYER_ID)
     {
         new 
             Text:t
@@ -373,7 +373,7 @@ static stock GameTextEx(playerid)
 forward OnHideGameText(playerid, styleid);
 public OnHideGameText(playerid, styleid)
 {
-    if(playerid == MAX_PLAYERS)
+    if (playerid == MAX_PLAYERS)
     {
         TextDrawHideForAll(gs_GameTextStyle[styleid]);
         gs_GameTextTimer[styleid][MAX_PLAYERS] = 0;
@@ -392,16 +392,16 @@ public OnHideGameText(playerid, styleid)
  */
 static stock OnDestroyGameText(playerid)
 {
-    if(playerid == INVALID_PLAYER_ID)
+    if (playerid == INVALID_PLAYER_ID)
     {
-        for(new style = GAMETEXT_STYLE_MIN; style <= GAMETEXT_STYLE_MAX; style++)
+        for (new style = GAMETEXT_STYLE_MIN; style <= GAMETEXT_STYLE_MAX; style++)
         {
             TextDrawDestroy(gs_GameTextStyle[style]);
         }
     }
     else
     {
-        for(new style = GAMETEXT_STYLE_MIN; style <= GAMETEXT_STYLE_MAX; style++)
+        for (new style = GAMETEXT_STYLE_MIN; style <= GAMETEXT_STYLE_MAX; style++)
         {
             PlayerTextDrawDestroy(playerid, gs_PlayerGameTextStyle[playerid][style]);
         }
@@ -418,16 +418,16 @@ static stock OnDestroyGameText(playerid)
  */
 stock FIXES_GameTextForPlayer(playerid, const text[], time, style)
 {
-    if(!IsPlayerConnected(playerid)) return false;
+    if (!IsPlayerConnected(playerid)) return false;
     
-    if(style <= GAMETEXT_LEGACY)
+    if (style <= GAMETEXT_LEGACY)
     {
         return GameTextForPlayer(playerid, text, time, style);
     }
     
-    if(!(GAMETEXT_STYLE_MIN <= style <= GAMETEXT_STYLE_MAX)) return false;
+    if (!(GAMETEXT_STYLE_MIN <= style <= GAMETEXT_STYLE_MAX)) return false;
     
-    if(gs_GameTextTimer[style][playerid])
+    if (gs_GameTextTimer[style][playerid])
     {
         KillTimer(gs_GameTextTimer[style][playerid]);
         gs_GameTextTimer[style][playerid] = 0;
@@ -446,7 +446,7 @@ stock FIXES_GameTextForPlayer(playerid, const text[], time, style)
 
     PlayerTextDrawShow(playerid, gs_PlayerGameTextStyle[playerid][style]);
     
-    if(time > 0)
+    if (time > 0)
     {
         gs_GameTextTimer[style][playerid] = SetTimerEx("OnHideGameText", time, false, "dd", playerid, style);
     }
@@ -462,14 +462,14 @@ stock FIXES_GameTextForPlayer(playerid, const text[], time, style)
  */
 stock FIXES_GameTextForAll(const text[], time, style)
 {
-    if(style <= GAMETEXT_LEGACY)
+    if (style <= GAMETEXT_LEGACY)
     {
         return GameTextForAll(text, time, style);
     }
     
-    if(!(GAMETEXT_STYLE_MIN <= style <= GAMETEXT_STYLE_MAX)) return false;
+    if (!(GAMETEXT_STYLE_MIN <= style <= GAMETEXT_STYLE_MAX)) return false;
     
-    if(gs_GameTextTimer[style][MAX_PLAYERS])
+    if (gs_GameTextTimer[style][MAX_PLAYERS])
     {
         KillTimer(gs_GameTextTimer[style][MAX_PLAYERS]);
         gs_GameTextTimer[style][MAX_PLAYERS] = 0;
@@ -488,7 +488,7 @@ stock FIXES_GameTextForAll(const text[], time, style)
 
     TextDrawShowForAll(gs_GameTextStyle[style]);
     
-    if(time > 0)
+    if (time > 0)
     {
         gs_GameTextTimer[style][MAX_PLAYERS] = SetTimerEx("OnHideGameText", time, false, "dd", MAX_PLAYERS, style);
     }

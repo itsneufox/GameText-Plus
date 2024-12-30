@@ -53,9 +53,9 @@ public OnPlayerDisconnect(playerid, reason)
 
 public OnPlayerCommandText(playerid, cmdtext[])
 {
-    if(!strcmp(cmdtext, "/test", true))
+    if (!strcmp(cmdtext, "/test", true))
     {
-        if(gTestActive[playerid])
+        if (gTestActive[playerid])
         {
             GameTextForPlayer(playerid, "~r~Test already running!", 3000, 0);
 
@@ -72,9 +72,9 @@ public OnPlayerCommandText(playerid, cmdtext[])
         return true;
     }
 
-    if(!strcmp(cmdtext, "/next", true))
+    if (!strcmp(cmdtext, "/next", true))
     {
-        if(!gTestActive[playerid])
+        if (!gTestActive[playerid])
         {
             GameTextForPlayer(playerid, "~r~Use /test first!", 3000, 0);
 
@@ -82,7 +82,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
         }
 
         gCurrentStyle[playerid]++;
-        if(gCurrentStyle[playerid] >= GAMETEXT_STYLE_COUNT)
+        if (gCurrentStyle[playerid] >= GAMETEXT_STYLE_COUNT)
         {
             GameTextForPlayer(playerid, "~g~Test Complete!", 3000, 2);
             SendClientMessage(playerid, -1, "You've seen all available styles!");
@@ -97,9 +97,9 @@ public OnPlayerCommandText(playerid, cmdtext[])
         return true;
     }
 
-    if(!strcmp(cmdtext, "/stop", true))
+    if (!strcmp(cmdtext, "/stop", true))
     {
-        if(!gTestActive[playerid])
+        if (!gTestActive[playerid])
         {
             GameTextForPlayer(playerid, "~r~No test running!", 3000, 0);
 
@@ -119,7 +119,7 @@ public OnPlayerCommandText(playerid, cmdtext[])
 ShowCurrentStyle(playerid)
 {
     // Show appropriate test text for each style
-    switch(gCurrentStyle[playerid])
+    switch (gCurrentStyle[playerid])
     {
         case 0: GameTextForPlayer(playerid, "mission passed!~n~~w~respect +", 3000, 0);
         case 1: GameTextForPlayer(playerid, "Nines and AK's", 3000, 1);
