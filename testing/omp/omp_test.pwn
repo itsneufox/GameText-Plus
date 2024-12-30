@@ -127,7 +127,7 @@ ShowCurrentStyle(playerid)
         case 3: GameTextForPlayer(playerid, "macaco", 3000, 3);
         case 4: GameTextForPlayer(playerid, "even more macaco", 3000, 4);
         case 5: GameTextForPlayer(playerid, "even more macaco again", 3000, 5);
-        case 6: GameTextForPlayer(playerid, "fine dunno anymore", 5000, 6);
+        case 6: GameTextForPlayer(playerid, "macaco time", 5000, 6);
         case 7: GameTextForPlayer(playerid, "NRG-500", 5000, 7); // Vehicle name style
         case 8: GameTextForPlayer(playerid, "Grove Street", 5000, 8); // Location style
         case 9: GameTextForPlayer(playerid, "K-Rose", 5000, 9); // Radio name

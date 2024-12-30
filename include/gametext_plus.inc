@@ -6,7 +6,7 @@
  *  |   |_| ||   _   || ||_|| ||   |___   |   |  |   |___ |   _   |  |   |  
  *  |_______||__| |__||_|   |_||_______|  |___|  |_______||__| |__|  |___|  
  *  
- *  GameText+ by itsneufox (v1.0.1)
+ *  GameText+ by itsneufox (v1.0.2)
  *  Textdraws originally created by Y_Less for fixes.inc - https://github.com/pawn-lang/sa-mp-fixes
  */
 
