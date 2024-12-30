@@ -6,7 +6,9 @@
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 GameText+ is an include for both SA-MP and open.mp that improves the native GameText. 
-It introduces enhanced styling options, improved functionality, and seamless integration with existing scripts. 
+
+It introduces enhanced styling options, improved functionality, and seamless integration with existing scripts.
+
 By incorporating fixes previously handled by fixes.inc, it provides a comprehensive solution for all your in-game GameText display needs.
 
 ## Key Features
