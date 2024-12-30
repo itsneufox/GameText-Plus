@@ -39,7 +39,7 @@ public OnPlayerConnect(playerid)
     SendClientMessage(playerid, -1, "  {FFFF00}/next{FFFFFF} - Show the next style");
     SendClientMessage(playerid, -1, "  {FFFF00}/stop{FFFFFF} - Stop the test");
 
-    TogglePlayerSpectating(playerid, 1);
+    TogglePlayerSpectating(playerid, true);
 
 	return true;
 }
