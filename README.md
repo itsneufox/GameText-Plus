@@ -1,8 +1,8 @@
 # neufox's GameText+
 
-[![SA-MP Version](https://img.shields.io/badge/SA--MP-✓-green.svg)](https://www.sa-mp.mp/)
+[![SA-MP Version](https://img.shields.io/badge/SA--MP-✔-green.svg)](https://www.sa-mp.mp/)
 [![open.mp](https://img.shields.io/badge/open.mp-✔-green.svg)](https://www.open.mp/)
-[![open.mp](https://img.shields.io/badge/fixes.inc-🗙-red.svg)](https://github.com/pawn-lang/sa-mp-fixes)
+[![open.mp](https://img.shields.io/badge/fixes.inc-✖-red.svg)](https://github.com/pawn-lang/sa-mp-fixes)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 GameText+ is an include for both SA-MP and open.mp that improves the native GameText. 
