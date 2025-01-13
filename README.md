@@ -30,7 +30,7 @@ It introduces enhanced styling options, improved functionality, and seamless int
 #include <gametext_plus>
 ```
 
-## Platform Compatibility
+## Compatibility
 
 - **SA-MP**: Fully compatible
 - **open.mp**: Fully compatible
