@@ -77,7 +77,7 @@ The package includes comprehensive testing scripts for both platforms:
 - @AmyrAhmady - For the idea and the opportunity.
 - @edgyaf - for the textdraw's fader functionality
 - @imshooter - for the creation of Style 16
-- Y_Less - Original fixes.inc
+- @Y_Less - Original fixes.inc
 
 ## License
 
