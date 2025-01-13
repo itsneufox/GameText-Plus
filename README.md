@@ -1,8 +1,8 @@
-# neufox's GameText+
+# GameText+
 
-[![SA-MP Version](https://img.shields.io/badge/SA--MP-✔-green.svg)](https://www.sa-mp.mp/)
-[![open.mp](https://img.shields.io/badge/open.mp-✔-green.svg)](https://www.open.mp/)
-[![open.mp](https://img.shields.io/badge/fixes.inc-✖-red.svg)](https://github.com/pawn-lang/sa-mp-fixes)
+[![SA-MP Version](https://img.shields.io/badge/SA--MP-âœ”-green.svg)](https://www.sa-mp.mp/)
+[![open.mp](https://img.shields.io/badge/open.mp-âœ”-green.svg)](https://www.open.mp/)
+[![open.mp](https://img.shields.io/badge/fixes.inc-âœ–-red.svg)](https://github.com/pawn-lang/sa-mp-fixes)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 GameText+ is an include for both SA-MP and open.mp that improves the native GameText. 
@@ -12,6 +12,8 @@ It introduces enhanced styling options, improved functionality, and seamless int
 ## Key Features
 
 - Drop-in replacement for native GameText functions
+- Fader functionality integrated
+- 
 - Full SA-MP and open.mp compatibility
 
 ## Installation
@@ -23,16 +25,22 @@ It introduces enhanced styling options, improved functionality, and seamless int
 ```pawn
 #include <gametext_plus>
 ```
+4. OPTIONAL: If you want the include to override the native GameText (Style 1 -> 6), add the following line:
+```pawn
+#define OVERRIDE_NATIVE_GAMETEXT // This line should be added before including GameText+!
+#include <gametext_plus>
+```
 
 ## Platform Compatibility
 
 - **SA-MP**: Fully compatible
 - **open.mp**: Fully compatible
-- **fixes.inc**: Replaces fixes.inc, so incompatible.
+- **fixes.inc**: Replaces fixes.inc, it's incompatible and needs to be removed.
 
 ## Usage Examples
 
-GameText+ seamlessly replaces native functions while providing enhanced functionality:
+GameText+ seamlessly replaces native functions while providing enhanced functionality, this means no code changes are needed!
+Some examples:
 
 ```pawn
 // Show GameText to all players using location style
@@ -48,18 +56,7 @@ GameTextForPlayer(playerid, "K-Rose", 3000, 9);
 
 ## Style Reference Guide
 
-| Style ID | Description | Example Usage |
-|----------|-------------|---------------|
-| 0-6 | Native SA-MP styles | Mission passed, basic messages |
-| 7 | Vehicle Name | Vehicle names, model displays |
-| 8 | Location Name | Area names, territory notifications |
-| 9 | Radio Station | Radio station names |
-| 10 | Radio Switch | Station change |
-| 11 | Positive Money | Money gained, rewards |
-| 12 | Negative Money | Money lost, fines |
-| 13 | Stunt Bonus | Stunt rewards, bonus points |
-| 14 | Clock | Time display |
-| 15 | Notification | General UI notifications |
+[Check the wiki here](https://github.com/itsneufox/GameText-Plus/wiki)
 
 ## Testing Tools
 
@@ -78,19 +75,12 @@ The package includes comprehensive testing scripts for both platforms:
 
 ## Special Thanks
 
-- AmyrAhmady
-- edgyaf
+- @AmyrAhmady - For the idea and the opportunity.
+- @edgyaf - for the textdraw's fader functionality
+- @imshooter - for the creation of Style 16
 - Y_Less - Original fixes.inc
 
 ## License
 
 This project is licensed under the MIT License, making it freely available for use in both personal and commercial projects. See the LICENSE file for full details.
 
-## Support
-
-For issues, feature requests, or general support:
-- Open an issue on GitHub
-- Join the Discord community
-- Check the wiki for additional documentation
-
-Remember to star the repository if you find it useful!
