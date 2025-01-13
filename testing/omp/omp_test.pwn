@@ -14,7 +14,7 @@ main()
     printf(" ");
 }
 
-#define GAMETEXT_STYLE_COUNT 16
+#define GAMETEXT_STYLE_COUNT 17
 
 new 
     gCurrentStyle[MAX_PLAYERS],
@@ -137,6 +137,7 @@ ShowCurrentStyle(playerid)
         case 13: GameTextForPlayer(playerid, "DOUBLE INSANE STUNT BONUS: $125", 5000, 13); // Stunt bonus
         case 14: GameTextForPlayer(playerid, "09:41", 5000, 14); // Clock style
         case 15: GameTextForPlayer(playerid, "LSHIFT Increase Wager~n~LMB Decrease Wager~n~SPACE Proceed~n~RETURN Quit", 5000, 15); // Popup style
+        case 16: GameTextForPlayer(playerid, "LSHIFT Increase Wager~n~LMB Decrease Wager~n~SPACE Proceed~n~RETURN Quit", 5000, 16); // Lower popup style
     }
     
     // Show info about current style
