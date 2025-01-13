@@ -13,7 +13,6 @@ It introduces enhanced styling options, improved functionality, and seamless int
 
 - Drop-in replacement for native GameText functions
 - Fader functionality integrated
-- 
 - Full SA-MP and open.mp compatibility
 
 ## Installation
