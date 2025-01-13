@@ -1,4 +1,5 @@
 #include <a_samp>
+#define OVERRIDE_NATIVE_GAMETEXT
 #include <gametext_plus>
 
 main()
@@ -53,11 +54,11 @@ public OnPlayerDisconnect(playerid, reason)
 
 public OnPlayerCommandText(playerid, cmdtext[])
 {
-    if (!strcmp(cmdtext, "/test", true))
+    if(!strcmp(cmdtext, "/test", true))
     {
-        if (gTestActive[playerid])
+        if(gTestActive[playerid])
         {
-            GameTextForPlayer(playerid, "~r~Test already running!", 3000, 0);
+            GameTextForPlayer(playerid, "~r~Test already running!", 3000, 6);
 
             return true;
         }
@@ -72,19 +73,19 @@ public OnPlayerCommandText(playerid, cmdtext[])
         return true;
     }
 
-    if (!strcmp(cmdtext, "/next", true))
+    if(!strcmp(cmdtext, "/next", true))
     {
-        if (!gTestActive[playerid])
+        if(!gTestActive[playerid])
         {
-            GameTextForPlayer(playerid, "~r~Use /test first!", 3000, 0);
+            GameTextForPlayer(playerid, "~r~Use /test first!", 3000, 6);
 
             return true;
         }
 
         gCurrentStyle[playerid]++;
-        if (gCurrentStyle[playerid] >= GAMETEXT_STYLE_COUNT)
+        if(gCurrentStyle[playerid] >= GAMETEXT_STYLE_COUNT)
         {
-            GameTextForPlayer(playerid, "~g~Test Complete!", 3000, 2);
+            GameTextForPlayer(playerid, "~g~Test Complete!", 3000, 6);
             SendClientMessage(playerid, -1, "You've seen all available styles!");
             gTestActive[playerid] = 0;
             gPlayerShowingStyles[playerid] = false;
@@ -97,18 +98,18 @@ public OnPlayerCommandText(playerid, cmdtext[])
         return true;
     }
 
-    if (!strcmp(cmdtext, "/stop", true))
+    if(!strcmp(cmdtext, "/stop", true))
     {
-        if (!gTestActive[playerid])
+        if(!gTestActive[playerid])
         {
-            GameTextForPlayer(playerid, "~r~No test running!", 3000, 0);
+            GameTextForPlayer(playerid, "~r~No test running!", 3000, 6);
 
             return true;
         }
 
         gTestActive[playerid] = 0;
         gPlayerShowingStyles[playerid] = false;
-        GameTextForPlayer(playerid, "~y~Test Stopped", 3000, 2);
+        GameTextForPlayer(playerid, "~y~Test Stopped", 3000, 6);
 
         return true;
     }
@@ -127,7 +128,7 @@ ShowCurrentStyle(playerid)
         case 3: GameTextForPlayer(playerid, "macaco", 3000, 3);
         case 4: GameTextForPlayer(playerid, "even more macaco", 3000, 4);
         case 5: GameTextForPlayer(playerid, "even more macaco again", 3000, 5);
-        case 6: GameTextForPlayer(playerid, "macaco time", 5000, 6);
+        case 6: GameTextForPlayer(playerid, "it's macaco time", 5000, 6);
         case 7: GameTextForPlayer(playerid, "NRG-500", 5000, 7); // Vehicle name style
         case 8: GameTextForPlayer(playerid, "Grove Street", 5000, 8); // Location style
         case 9: GameTextForPlayer(playerid, "K-Rose", 5000, 9); // Radio name
