@@ -90,14 +90,14 @@
 static 
     Text:gs_GameTextStyle[GAMETEXT_STYLE_MAX + 1],
     PlayerText:gs_PlayerGameTextStyle[MAX_PLAYERS][GAMETEXT_STYLE_MAX + 1],
-    gs_GameTextTimer[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1],
-    gs_GameTextFadeOutTimer[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1],
-    gs_GameTextFadeInTimer[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1],
-    gs_GameTextOriginalColor[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1],
-    gs_GameTextOriginalBGColor[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1],
-    gs_GameTextOriginalBoxColor[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1],
-    bool:gs_GameTextIsFadingOut[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1],
-    bool:gs_GameTextIsFadingIn[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1]
+    gs_GameTextTimer[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS],
+    gs_GameTextFadeOutTimer[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS],
+    gs_GameTextFadeInTimer[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS],
+    gs_GameTextOriginalColor[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS],
+    gs_GameTextOriginalBGColor[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS],
+    gs_GameTextOriginalBoxColor[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS],
+    bool:gs_GameTextIsFadingOut[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS],
+    bool:gs_GameTextIsFadingIn[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS]
 ;
 
 //==========================================================================
