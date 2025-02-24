@@ -26,6 +26,10 @@
     #error "Incompatibility detected: 'fixes.inc' is deprecated in open.mp. Please remove it from your project. All GameText functionalities are now provided by GameText+ include."
 #endif
 
+#if !defined _INC_y_va
+    #tryinclude <YSI_Coding\y_va>
+#endif
+
 #if !defined _INC_open_mp
     #if !defined TEXT_DRAW_ALIGN
         #define TEXT_DRAW_ALIGN: _:
@@ -972,7 +976,7 @@ static stock OnDestroyGameText(playerid)
  * @param time - Duration in milliseconds (0 for permanent)
  * @param style - Style ID (0-6 for native, 7-15 for extended)
  */
-stock FIXES_GameTextForPlayer(playerid, const text[], time, style)
+stock FIXES_GameTextForPlayer(playerid, const text[], time, style, GLOBAL_TAG_TYPES:...)
 {
     if (!IsPlayerConnected(playerid)) return false;
     
@@ -1013,13 +1017,7 @@ stock FIXES_GameTextForPlayer(playerid, const text[], time, style)
         gs_GameTextOriginalBoxColor[style][playerid] = PlayerTextDrawGetBoxColour(playerid, gs_PlayerGameTextStyle[playerid][style]);
     }
     
-    #if defined _INC_open_mp
-        PlayerTextDrawSetString(playerid, gs_PlayerGameTextStyle[playerid][style], text);
-    #else
-        new string[MAX_GAMETEXT_LENGTH];
-        format(string, sizeof(string), "%s", text);
-        PlayerTextDrawSetString(playerid, gs_PlayerGameTextStyle[playerid][style], string);
-    #endif
+    PlayerTextDrawSetString(playerid, gs_PlayerGameTextStyle[playerid][style], text, ___(4));
 
     if (style == 14 || style == 9 || style == 10)
     {
@@ -1045,7 +1043,7 @@ stock FIXES_GameTextForPlayer(playerid, const text[], time, style)
  * @param time - Duration in milliseconds (0 for permanent)
  * @param style - Style ID (0-6 for native, 7-15 for extended)
  */
-stock FIXES_GameTextForAll(const text[], time, style)
+stock FIXES_GameTextForAll(const text[], time, style, GLOBAL_TAG_TYPES:...)
 {
     #if !defined OVERRIDE_NATIVE_GAMETEXT
         if (style <= GAMETEXT_LEGACY)
@@ -1084,13 +1082,7 @@ stock FIXES_GameTextForAll(const text[], time, style)
         gs_GameTextOriginalBoxColor[style][MAX_PLAYERS] = TextDrawGetBoxColour(gs_GameTextStyle[style]);
     }
     
-    #if defined _INC_open_mp
-        TextDrawSetString(gs_GameTextStyle[style], text);
-    #else
-        new string[MAX_GAMETEXT_LENGTH];
-        format(string, sizeof(string), "%s", text);
-        TextDrawSetString(gs_GameTextStyle[style], string);
-    #endif
+    TextDrawSetString(gs_GameTextStyle[style], text, ___(3));
 
     if (style == 14 || style == 9 || style == 10)
     {
