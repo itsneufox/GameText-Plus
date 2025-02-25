@@ -119,26 +119,32 @@ public OnPlayerCommandText(playerid, cmdtext[])
 
 ShowCurrentStyle(playerid)
 {
-    // Show appropriate test text for each style
+
+    new Float:health, Float:armor, pname[MAX_PLAYER_NAME + 1];
+
+    GetPlayerHealth(playerid, health);
+    GetPlayerArmour(playerid, armor);
+    GetPlayerName(playerid, pname, sizeof(pname));
+
     switch (gCurrentStyle[playerid])
     {
-        case 0: GameTextForPlayer(playerid, "mission passed!~n~~w~respect +", 3000, 0);
-        case 1: GameTextForPlayer(playerid, "Nines and AK's", 3000, 1);
-        case 2: GameTextForPlayer(playerid, "wasted", 3000, 2);
-        case 3: GameTextForPlayer(playerid, "macaco", 3000, 3);
-        case 4: GameTextForPlayer(playerid, "even more macaco", 3000, 4);
-        case 5: GameTextForPlayer(playerid, "even more macaco again", 3000, 5);
-        case 6: GameTextForPlayer(playerid, "it's macaco time", 5000, 6);
-        case 7: GameTextForPlayer(playerid, "NRG-500", 5000, 7); // Vehicle name style
-        case 8: GameTextForPlayer(playerid, "Grove Street", 5000, 8); // Location style
-        case 9: GameTextForPlayer(playerid, "K-Rose", 5000, 9); // Radio name
-        case 10: GameTextForPlayer(playerid, "K-Rose", 5000, 10); // Radio switch
-        case 11: GameTextForPlayer(playerid, "+$50,000", 5000, 11); // Positive money
-        case 12: GameTextForPlayer(playerid, "-$50,000", 5000, 12); // Negative money
-        case 13: GameTextForPlayer(playerid, "DOUBLE INSANE STUNT BONUS: $125", 5000, 13); // Stunt bonus
-        case 14: GameTextForPlayer(playerid, "09:41", 5000, 14); // Clock style
-        case 15: GameTextForPlayer(playerid, "LSHIFT Increase Wager~n~LMB Decrease Wager~n~SPACE Proceed~n~RETURN Quit", 5000, 15); // Popup style
-        case 16: GameTextForPlayer(playerid, "LSHIFT Increase Wager~n~LMB Decrease Wager~n~SPACE Proceed~n~RETURN Quit", 5000, 16); // Lower popup style
+        case 0: GameTextForPlayer(playerid, "~g~MISSION PASSED!~n~~w~Respect +%d", 3000, 0, 10);
+        case 1: GameTextForPlayer(playerid, "~y~Player: %s~n~~w~Weapons Unlocked", 3000, 1, pname);
+        case 2: GameTextForPlayer(playerid, "~r~WASTED~n~$%d lost", 3000, 2, 500);
+        case 3: GameTextForPlayer(playerid, "~b~Player ID: %d~n~~w~Health: %.1f", 3000, 3, playerid, health);
+        case 4: GameTextForPlayer(playerid, "~p~Style %d~n~~w~Armor: %.1f", 3000, 4, 4, armor);
+        case 5: GameTextForPlayer(playerid, "~y~Score: %d~n~~w~Position: %d/%d", 3000, 5, GetPlayerScore(playerid), playerid + 1, GetMaxPlayers());
+        case 6: GameTextForPlayer(playerid, "~b~Current Time: %02d:%02d~n~~w~Game Date: %02d/%02d/%d", 5000, 6, gettime() % 60, gettime() / 60 % 60, getdate() % 30, getdate() % 12, getdate() / 12 + 2000);
+        case 7: GameTextForPlayer(playerid, "Vehicle ID: %d", 5000, 7, 522); // Vehicle name style with ID
+        case 8: GameTextForPlayer(playerid, "Zone: %s", 5000, 8, "Los Santos"); // Location style
+        case 9: GameTextForPlayer(playerid, "Radio: %s", 5000, 9, "Los Santos"); // Radio name
+        case 10: GameTextForPlayer(playerid, "Finding: %s...", 5000, 10, "Station"); // Radio switch
+        case 11: GameTextForPlayer(playerid, "+$%d", 5000, 11, 100000); // Positive money
+        case 12: GameTextForPlayer(playerid, "-$%d", 5000, 12, 25000); // Negative money
+        case 13: GameTextForPlayer(playerid, "%s STUNT BONUS: $%d", 5000, 13, "INSANE", 500); // Stunt bonus
+        case 14: GameTextForPlayer(playerid, "%02d:%02d", 5000, 14, gettime() / 60 % 60, gettime() % 60); // Clock style
+        case 15: GameTextForPlayer(playerid, "~y~CONTROLS~n~~w~%s: Help Menu~n~%s: Options~n~%s: Statistics~n~%s: Quit", 5000, 15, "F1", "F2", "F3", "ESC"); // Popup style
+        case 16: GameTextForPlayer(playerid, "~g~TIPS~n~~w~Use %s for commands~n~Press %s to enter vehicles~n~Press %s to accept offers", 5000, 16, "/help", "H", "Y"); // Lower popup style
     }
     
     // Show info about current style
