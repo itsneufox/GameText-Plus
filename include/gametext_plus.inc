@@ -952,7 +952,7 @@ public OnHideGameText(playerid, styleid)
         if (playerid == MAX_PLAYERS)
         {
             TextDrawHideForAll(gs_GameTextStyle[styleid]);
-            gs_GameTextTimer[styleid][MAX_PLAYERS] = 0; //here
+            gs_GameTextTimer[styleid][MAX_PLAYERS] = 0;
         }
         else
         {
@@ -966,9 +966,9 @@ public OnHideGameText(playerid, styleid)
     {
         if (playerid == MAX_PLAYERS)
         {
-            gs_GameTextOriginalColor[styleid][MAX_PLAYERS] = TextDrawGetColour(gs_GameTextStyle[styleid]); //here
-            gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] = TextDrawGetBackgroundColour(gs_GameTextStyle[styleid]); //here
-            gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] = TextDrawGetBoxColour(gs_GameTextStyle[styleid]); //here
+            gs_GameTextOriginalColor[styleid][MAX_PLAYERS] = TextDrawGetColour(gs_GameTextStyle[styleid]); 
+            gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] = TextDrawGetBackgroundColour(gs_GameTextStyle[styleid]); 
+            gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] = TextDrawGetBoxColour(gs_GameTextStyle[styleid]); 
         }
         else
         {
@@ -1329,11 +1329,11 @@ public OnFadeInGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, b
     {
         if (playerid == MAX_PLAYERS)
         {
-            TextDrawColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalColor[styleid][MAX_PLAYERS] & ~0xFF) | colourAlpha); //here
-            TextDrawBackgroundColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] & ~0xFF) | backgroundColourAlpha); //here
+            TextDrawColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalColor[styleid][MAX_PLAYERS] & ~0xFF) | colourAlpha); 
+            TextDrawBackgroundColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] & ~0xFF) | backgroundColourAlpha); 
             if (styleid != 14 && styleid != 9 && styleid != 10)
             {
-                TextDrawBoxColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] & ~0xFF) | boxColourAlpha);  //here
+                TextDrawBoxColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] & ~0xFF) | boxColourAlpha);  
             }
             TextDrawShowForAll(gs_GameTextStyle[styleid]);
         }
@@ -1386,11 +1386,11 @@ public OnFadeOutGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, 
     {
         if (playerid == MAX_PLAYERS)
         {
-            TextDrawColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalColor[styleid][MAX_PLAYERS] & ~0xFF) | colourAlpha);  //here
-            TextDrawBackgroundColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] & ~0xFF) | backgroundColourAlpha); //here
+            TextDrawColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalColor[styleid][MAX_PLAYERS] & ~0xFF) | colourAlpha);  
+            TextDrawBackgroundColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] & ~0xFF) | backgroundColourAlpha); 
             if (styleid != 14 && styleid != 9 && styleid != 10)
             {
-                TextDrawBoxColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] & ~0xFF) | boxColourAlpha); //here
+                TextDrawBoxColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] & ~0xFF) | boxColourAlpha); 
             }
             TextDrawShowForAll(gs_GameTextStyle[styleid]);
         }
@@ -1415,11 +1415,11 @@ public OnFadeOutGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, 
 
         if (playerid == MAX_PLAYERS)
         {
-            TextDrawColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalColor[styleid][MAX_PLAYERS] & ~0xFF) | origColorAlpha); //here
-            TextDrawBackgroundColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] & ~0xFF) | origBGAlpha); //here
+            TextDrawColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalColor[styleid][MAX_PLAYERS] & ~0xFF) | origColorAlpha); 
+            TextDrawBackgroundColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] & ~0xFF) | origBGAlpha); 
             if (styleid != 14 && styleid != 9 && styleid != 10)
             {
-                TextDrawBoxColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] & ~0xFF) | origBoxAlpha); //here
+                TextDrawBoxColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] & ~0xFF) | origBoxAlpha); 
             }
             TextDrawHideForAll(gs_GameTextStyle[styleid]);
         }
