@@ -6,16 +6,21 @@
  *  |   |_| ||   _   || ||_|| ||   |___   |   |  |   |___ |   _   |  |   |  
  *  |_______||__| |__||_|   |_||_______|  |___|  |_______||__| |__|  |___|  
  *  
- *  GameText+ by itsneufox (v1.1.0)
+ *  GameText+ created and maintained by itsneufox (v1.2.0)
+
  *  Textdraws originally created by Y_Less for fixes.inc
- *  Fader functionality by edgyaf
+ *  Fader functionality created by edgyaf
  *  Style 16 created by imshooter
+ *  Assembly code created by __SyS__ and iAmir
+ *  Style 17 created by Vince0789
+ *  Code to adjust TextDraw aspect ratio created by Nexius
+
+ *  Thank you to y'all! <3
  */
 
 //==========================================================================
 //                          HEADER GUARDS & CHECKS
 //==========================================================================
-
 
 #if defined _INC_gametext_plus
     #endinput
@@ -25,15 +30,6 @@
 
 #if defined _INC_SAMP_Community_fixes
     #error "Incompatibility detected: 'fixes.inc' is deprecated in open.mp. Please remove it from your project. All GameText functionalities are now provided by GameText+ include."
-#endif
-
-#if defined GAMETEXT_USE_YSI
-    #if !defined _INC_y_va
-        #tryinclude <YSI_Coding\y_va>
-        #if !defined _INC_y_va
-            #error "You defined GAMETEXT_USE_YSI but YSI's y_va couldn't be included. Make sure it's properly installed."
-        #endif
-    #endif
 #endif
 
 #if !defined _INC_open_mp
@@ -89,7 +85,7 @@
 
 #define     MAX_GAMETEXT_LENGTH     256
 #define     GAMETEXT_LEGACY         6 
-#define     GAMETEXT_STYLE_MAX      16
+#define     GAMETEXT_STYLE_MAX      17
 #define     FADE_INTERVAL           50
 #define     FADE_ALPHA_STEP         0x12
 
@@ -553,6 +549,26 @@ static stock GameTextEx(playerid)
         TextDrawSetProportional(t, true);
         TextDrawUseBox(t, true);
         TextDrawTextSize(t, 212.0, 200.0);
+
+        // Style 17 (Subtitles Style)
+        t = gs_GameTextStyle[17] = TextDrawCreate(380.0, 345.0, EMPTY_STRING);
+        TextDrawLetterSize(t, 0.45, 1.95);
+        TextDrawAlignment(t, TEXT_DRAW_ALIGN:2);
+        #if !defined _INC_open_mp
+            TextDrawColour(t, SaveTextDrawColour(t, 0xE1E1E1FF));
+            TextDrawBackgroundColour(t, SaveTextDrawBackgroundColour(t, 0x000000FF));
+            TextDrawBoxColour(t, SaveTextDrawBoxColour(t, 0x00000000));
+        #else
+            TextDrawColour(t, 0xE1E1E1FF);
+            TextDrawBackgroundColour(t, 0x000000FF);
+            TextDrawBoxColour(t, 0x00000000);
+        #endif
+        TextDrawSetShadow(t, 0);
+        TextDrawSetOutline(t, 1);
+        TextDrawFont(t, TEXT_DRAW_FONT:1);
+        TextDrawSetProportional(t, true);
+        TextDrawUseBox(t, true);
+        TextDrawTextSize(t, 70.0, 448.0);
     }
     else
     {
@@ -899,6 +915,26 @@ static stock GameTextEx(playerid)
         PlayerTextDrawSetProportional(playerid, pt, true);
         PlayerTextDrawUseBox(playerid, pt, true);
         PlayerTextDrawTextSize(playerid, pt, 212.0, 200.0);
+
+        // Style 17 (Subtitles Style)
+        pt = gs_PlayerGameTextStyle[playerid][17] = CreatePlayerTextDraw(playerid, 380.0, 345.0, EMPTY_STRING);
+        PlayerTextDrawLetterSize(playerid, pt, 0.45, 1.95);
+        PlayerTextDrawAlignment(playerid, pt, TEXT_DRAW_ALIGN:2);
+        #if !defined _INC_open_mp
+            PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0xE1E1E1FF));
+            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundColour(playerid, pt, 0x000000FF));
+            PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, 0x00000000));
+        #else
+            PlayerTextDrawColour(playerid, pt, 0xE1E1E1FF);
+            PlayerTextDrawBackgroundColour(playerid, pt, 0x000000FF);
+            PlayerTextDrawBoxColour(playerid, pt, 0x00000000);
+        #endif
+        PlayerTextDrawSetShadow(playerid, pt, 0);
+        PlayerTextDrawSetOutline(playerid, pt, 1);
+        PlayerTextDrawFont(playerid, pt, TEXT_DRAW_FONT:1);
+        PlayerTextDrawSetProportional(playerid, pt, true);
+        PlayerTextDrawUseBox(playerid, pt, true);
+        PlayerTextDrawTextSize(playerid, pt, 70.0, 448.0);
     }
     return true;
 }
@@ -982,49 +1018,53 @@ static stock OnDestroyGameText(playerid)
  * @param time - Duration in milliseconds (0 for permanent)
  * @param style - Style ID (0-6 for native, 7-15 for extended)
  */
-#if defined GAMETEXT_USE_YSI
-stock FIXES_GameTextForPlayer(playerid, const text[], time, style, GLOBAL_TAG_TYPES:...)
-#else
 stock FIXES_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
-#endif
 {
     if (!IsPlayerConnected(playerid)) return false;
 
     if (!(GAMETEXT_STYLE_MIN <= style <= GAMETEXT_STYLE_MAX)) return false;
+
+    const static_args = 4;
+    const args_diff = (3 - static_args) * 4; // format's static args end at index 3, current function's end at static_arg_count. Also * 4 because cells are 4 bytes
+
+    static args;
+    args = numargs();
     
     #if !defined OVERRIDE_NATIVE_GAMETEXT
         if (style <= GAMETEXT_LEGACY)
         {
-            #if defined GAMETEXT_USE_YSI
-                return GameTextForPlayer(playerid, text, time, style, ___(4));
-            #else
-                if (numargs() > 4)
+            if (args > static_args)
+            {
+                static string[256];
+                const string_size = sizeof(string);
+
+                while (--args >= 4)
                 {
-                    static 
-                        args,
-                        string[100];
-                                        
-                    #emit LOAD.S.pri 8
-                    #emit CONST.alt 12
-                    #emit SUB 
-                    #emit CONST.alt 8
-                    #emit ADD
-                    #emit STOR.pri args
-                    #emit STACK 28
-                    #emit PUSH.S text
-                    #emit PUSH.C 100
-                    #emit PUSH.C string
-                    #emit PUSH args
-                    #emit SYSREQ.C format
                     #emit LCTRL 5
-                    #emit SCTRL 4
-                    return GameTextForPlayer(playerid, string, time, style);
+                    #emit LOAD.alt args
+                    #emit SHL.C.alt 2
+                    #emit ADD.C 12
+                    #emit ADD
+                    #emit LOAD.I
+                    #emit PUSH.pri
                 }
-                else
-                {
-                    return GameTextForPlayer(playerid, text, time, style);
-                }
-            #endif
+
+                #emit PUSH.S text
+                #emit PUSH.C string_size
+                #emit PUSH.C string
+                #emit LOAD.S.pri 8
+                #emit ADD.C args_diff
+                #emit PUSH.pri
+                #emit SYSREQ.C format
+                #emit LCTRL 5
+                #emit SCTRL 4
+                
+                return GameTextForPlayer(playerid, string, time, style);
+            }
+            else
+            {
+                return GameTextForPlayer(playerid, text, time, style);
+            }
         }
     #endif
     
@@ -1055,49 +1095,45 @@ stock FIXES_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:..
         gs_GameTextOriginalBGColor[style][playerid] = PlayerTextDrawGetBackgroundColour(playerid, gs_PlayerGameTextStyle[playerid][style]);
         gs_GameTextOriginalBoxColor[style][playerid] = PlayerTextDrawGetBoxColour(playerid, gs_PlayerGameTextStyle[playerid][style]);
     }
-    
-    #if defined GAMETEXT_USE_YSI
-        PlayerTextDrawSetString(playerid, gs_PlayerGameTextStyle[playerid][style], text, ___(4));
-    #else
-        // Check if we have any variable arguments
-        if (numargs() > 4)
+
+    if (args > static_args)
+    {
+        static string[256];
+        const string_size = sizeof(string);
+
+        while (--args >= 4)
         {
-            static 
-                args,
-                string[100];
-                                
-            #emit LOAD.S.pri 8
-            #emit CONST.alt 12
-            #emit SUB 
-            #emit CONST.alt 8
-            #emit ADD
-            #emit STOR.pri args
-            #emit STACK 28
-            #emit PUSH.S text
-            #emit PUSH.C 100
-            #emit PUSH.C string
-            #emit PUSH args
-            #emit SYSREQ.C format
             #emit LCTRL 5
-            #emit SCTRL 4
-            
-            #if defined _INC_open_mp
-                PlayerTextDrawSetString(playerid, gs_PlayerGameTextStyle[playerid][style], string);
-            #else
-                PlayerTextDrawSetString(playerid, gs_PlayerGameTextStyle[playerid][style], string);
-            #endif
+            #emit LOAD.alt args
+            #emit SHL.C.alt 2
+            #emit ADD.C 12
+            #emit ADD
+            #emit LOAD.I
+            #emit PUSH.pri
         }
-        else
-        {
-            #if defined _INC_open_mp
-                PlayerTextDrawSetString(playerid, gs_PlayerGameTextStyle[playerid][style], text);
-            #else
-                static string[MAX_GAMETEXT_LENGTH];
-                format(string, sizeof(string), "%s", text);
-                PlayerTextDrawSetString(playerid, gs_PlayerGameTextStyle[playerid][style], string);
-            #endif
-        }
-    #endif
+
+        #emit PUSH.S text
+        #emit PUSH.C string_size
+        #emit PUSH.C string
+        #emit LOAD.S.pri 8
+        #emit ADD.C args_diff
+        #emit PUSH.pri
+        #emit SYSREQ.C format
+        #emit LCTRL 5
+        #emit SCTRL 4
+        
+        PlayerTextDrawSetString(playerid, gs_PlayerGameTextStyle[playerid][style], string);
+    }
+    else
+    {
+        #if defined _INC_open_mp
+            PlayerTextDrawSetString(playerid, gs_PlayerGameTextStyle[playerid][style], text);
+        #else
+            static string[MAX_GAMETEXT_LENGTH];
+            format(string, sizeof(string), "%s", text);
+            PlayerTextDrawSetString(playerid, gs_PlayerGameTextStyle[playerid][style], string);
+        #endif
+    }
 
     if (style == 14 || style == 9 || style == 10)
     {
@@ -1124,54 +1160,53 @@ stock FIXES_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:..
  * @param time - Duration in milliseconds (0 for permanent)
  * @param style - Style ID (0-6 for native, 7-15 for extended)
  */
-#if defined GAMETEXT_USE_YSI
-stock FIXES_GameTextForAll(const text[], time, style, GLOBAL_TAG_TYPES:...)
-#else
 stock FIXES_GameTextForAll(const text[], time, style, {Float, _}:...)
-#endif
 {
+    if (!(GAMETEXT_STYLE_MIN <= style <= GAMETEXT_STYLE_MAX)) return false;
+
+    const static_args = 3;
+    const args_diff = (3 - static_args) * 4; // format's static args end at index 3, current function's end at static_arg_count. Also * 4 because cells are 4 bytes
+
+    static args;
+    args = numargs();
+    
     #if !defined OVERRIDE_NATIVE_GAMETEXT
         if (style <= GAMETEXT_LEGACY)
         {
-            #if defined GAMETEXT_USE_YSI
-                return GameTextForAll(text, time, style, ___(3));
-            #else
-                if (numargs() > 3)
+            if (args > static_args)
+            {
+                static string[256];
+                const string_size = sizeof(string);
+
+                while (--args >= 3)
                 {
-                    static 
-                        args,
-                        string[MAX_GAMETEXT_LENGTH];
-                    
-                    args = numargs();
-                    while (--args >= 3)
-                    {
-                        #emit LCTRL 5
-                        #emit LOAD.alt args
-                        #emit SHL.C.alt 2
-                        #emit ADD.C 12
-                        #emit ADD
-                        #emit LOAD.I
-                        #emit PUSH.pri
-                    }
-                    #emit PUSH.S text
-                    #emit PUSH.C 256
-                    #emit PUSH.C string
-                    #emit PUSH.S 8
-                    #emit SYSREQ.C format
                     #emit LCTRL 5
-                    #emit SCTRL 4
-                    
-                    return GameTextForAll(string, time, style);
+                    #emit LOAD.alt args
+                    #emit SHL.C.alt 2
+                    #emit ADD.C 12
+                    #emit ADD
+                    #emit LOAD.I
+                    #emit PUSH.pri
                 }
-                else
-                {
-                    return GameTextForAll(text, time, style);
-                }
-            #endif
+
+                #emit PUSH.S text
+                #emit PUSH.C string_size
+                #emit PUSH.C string
+                #emit LOAD.S.pri 8
+                #emit ADD.C args_diff
+                #emit PUSH.pri
+                #emit SYSREQ.C format
+                #emit LCTRL 5
+                #emit SCTRL 4
+                
+                return GameTextForAll(string, time, style);
+            }
+            else
+            {
+                return GameTextForAll(text, time, style);
+            }
         }
     #endif
-    
-    if (!(GAMETEXT_STYLE_MIN <= style <= GAMETEXT_STYLE_MAX)) return false;
     
     if (gs_GameTextTimer[style][MAX_PLAYERS])
     {
@@ -1200,52 +1235,45 @@ stock FIXES_GameTextForAll(const text[], time, style, {Float, _}:...)
         gs_GameTextOriginalBGColor[style][MAX_PLAYERS] = TextDrawGetBackgroundColour(gs_GameTextStyle[style]);
         gs_GameTextOriginalBoxColor[style][MAX_PLAYERS] = TextDrawGetBoxColour(gs_GameTextStyle[style]);
     }
-    
-    #if defined GAMETEXT_USE_YSI
-        TextDrawSetString(gs_GameTextStyle[style], text, ___(3));
-    #else
-        if (numargs() > 3)
+
+    if (args > static_args)
+    {
+        static string[256];
+        const string_size = sizeof(string);
+
+        while (--args >= 3)
         {
-            static 
-                args,
-                string[MAX_GAMETEXT_LENGTH];
-            
-            args = numargs();
-            while (--args >= 3)
-            {
-                #emit LCTRL 5
-                #emit LOAD.alt args
-                #emit SHL.C.alt 2
-                #emit ADD.C 12
-                #emit ADD
-                #emit LOAD.I
-                #emit PUSH.pri
-            }
-            #emit PUSH.S text
-            #emit PUSH.C 256
-            #emit PUSH.C string
-            #emit PUSH.S 8
-            #emit SYSREQ.C format
             #emit LCTRL 5
-            #emit SCTRL 4
-            
-            #if defined _INC_open_mp
-                TextDrawSetString(gs_GameTextStyle[style], string);
-            #else
-                TextDrawSetString(gs_GameTextStyle[style], string);
-            #endif
+            #emit LOAD.alt args
+            #emit SHL.C.alt 2
+            #emit ADD.C 12
+            #emit ADD
+            #emit LOAD.I
+            #emit PUSH.pri
         }
-        else
-        {
-            #if defined _INC_open_mp
-                TextDrawSetString(gs_GameTextStyle[style], text);
-            #else
-                static string[MAX_GAMETEXT_LENGTH];
-                format(string, sizeof(string), "%s", text);
-                TextDrawSetString(gs_GameTextStyle[style], string);
-            #endif
-        }
-    #endif
+
+        #emit PUSH.S text
+        #emit PUSH.C string_size
+        #emit PUSH.C string
+        #emit LOAD.S.pri 8
+        #emit ADD.C args_diff
+        #emit PUSH.pri
+        #emit SYSREQ.C format
+        #emit LCTRL 5
+        #emit SCTRL 4
+        
+        TextDrawSetString(gs_GameTextStyle[style], string);
+    }
+    else
+    {
+        #if defined _INC_open_mp
+            TextDrawSetString(gs_GameTextStyle[style], text);
+        #else
+            static string[MAX_GAMETEXT_LENGTH];
+            format(string, sizeof(string), "%s", text);
+            TextDrawSetString(gs_GameTextStyle[style], string);
+        #endif
+    }
 
     if (style == 14 || style == 9 || style == 10)
     {
