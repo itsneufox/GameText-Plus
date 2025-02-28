@@ -13,7 +13,6 @@
  *  Style 16 created by imshooter
  *  Assembly code created by __SyS__ and iAmir
  *  Style 17 created by Vince0789
- *  Code to adjust TextDraw aspect ratio created by Nexius
 
  *  Thank you to y'all! <3
  */
