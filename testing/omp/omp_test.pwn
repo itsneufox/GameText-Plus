@@ -1,5 +1,12 @@
 /*
- * GameText+ Test Gamemode
+ *   _______  _______  __   __  _______  _______  _______  __   __  _______    _    
+ *  |    ___||   _   ||  |_|  ||    ___||_     _||    ___||  |_|  ||_     _| _| |_  
+ *  |   | __ |  | |  ||       ||   |___   |   |  |   |___ |       |  |   |  |_   _| 
+ *  |   ||  ||  |_|  ||       ||    ___|  |   |  |    ___| |     |   |   |    |_|   
+ *  |   |_| ||   _   || ||_|| ||   |___   |   |  |   |___ |   _   |  |   |  
+ *  |_______||__| |__||_|   |_||_______|  |___|  |_______||__| |__|  |___|  
+ *  
+ *  GameText+ test gamemode created and maintained by itsneufox (v1.0.1)
  * 
  * This gamemode demonstrates all available gametext styles from the GameText+ include.
  * It provides an interactive way to test different text effects, styles and formatting options.
@@ -7,19 +14,17 @@
 
 #include <open.mp>
 
-
-// * |=================================================================================|
-// * |  When defined, GameText+ will replace the default SA-MP gametext styles (0-6)   |
-// * |  with enhanced versions that support formatting and fade effects.               |
-// * |  Comment this line if you want to keep the original behavior for styles 0-6.    |
-// * |                                                                                 |
-                             #define OVERRIDE_NATIVE_GAMETEXT
-// * |                                                                                 |
-// * |=================================================================================|
+/*
+ * ||=================================================================================||
+ * ||  When defined, GameText+ will replace the default SA-MP gametext styles (0-6)   ||
+ * ||  with enhanced versions that support formatting and fade effects.               ||
+ * ||  Comment the following line if you want to keep the original behavior.          ||
+ * ||=================================================================================||
+*/
+#define OVERRIDE_NATIVE_GAMETEXT
 
 
 #include <gametext_plus>
-
 
 main()
 {
@@ -177,15 +182,14 @@ ShowCurrentStyle(playerid)
     GetPlayerArmour(playerid, armor);
     GetPlayerName(playerid, pname, sizeof(pname));
     
-    // Show info about current style
     new string[128];
     format(string, sizeof(string), "Showing style %d of %d", 
         gCurrentStyle[playerid], GAMETEXT_STYLE_MAX);
     SendClientMessage(playerid, -1, string);
     
-    if (gTestType[playerid] == 0) // Normal GameText for Player (about the player)
+    if (gTestType[playerid] == 0)
     {
-        switch(gCurrentStyle[playerid])
+        switch(gCurrentStyle[playerid])// Normal GameText for Player
         {
             case 0: GameTextForPlayer(playerid, "~g~MISSION PASSED!~n~~w~Respect +100", 5000, 0);
             case 1: GameTextForPlayer(playerid, "~y~Player Connected~n~~w~Weapons Available", 5000, 1);
@@ -194,20 +198,20 @@ ShowCurrentStyle(playerid)
             case 4: GameTextForPlayer(playerid, "~p~Your Armor~n~~w~AP: 0.0", 5000, 4);
             case 5: GameTextForPlayer(playerid, "~y~Your Score~n~~w~Position: 1/50", 5000, 5);
             case 6: GameTextForPlayer(playerid, "~b~Your Location~n~~w~Los Santos", 5000, 6);
-            case 7: GameTextForPlayer(playerid, "NRG-500", 5000, 7); // Vehicle name style
-            case 8: GameTextForPlayer(playerid, "Grove Street", 5000, 8); // Location style
-            case 9: GameTextForPlayer(playerid, "Radio: Los Santos", 5000, 9); // Radio name
-            case 10: GameTextForPlayer(playerid, "Finding: Station...", 5000, 10); // Radio switch
-            case 11: GameTextForPlayer(playerid, "+$1000", 5000, 11); // Positive money
-            case 12: GameTextForPlayer(playerid, "-$250", 5000, 12); // Negative money
-            case 13: GameTextForPlayer(playerid, "INSANE STUNT BONUS: $500", 5000, 13); // Stunt bonus
-            case 14: GameTextForPlayer(playerid, "12:34", 5000, 14); // Clock style
-            case 15: GameTextForPlayer(playerid, "~y~YOUR CONTROLS~n~~w~F1: Help Menu~n~F2: Options~n~F3: Statistics~n~ESC: Quit", 5000, 15); // Popup style
-            case 16: GameTextForPlayer(playerid, "~g~YOUR TIPS~n~~w~Use /help for commands~n~Press H to enter vehicles~n~Press Y to accept offers", 5000, 16); // Lower popup style
-            case 17: GameTextForPlayer(playerid, "~w~You have completed the mission, return to base for reward", 5000, 17); // Subtitles style
+            case 7: GameTextForPlayer(playerid, "NRG-500", 5000, 7);
+            case 8: GameTextForPlayer(playerid, "Grove Street", 5000, 8);
+            case 9: GameTextForPlayer(playerid, "Radio: Los Santos", 5000, 9);
+            case 10: GameTextForPlayer(playerid, "Finding: Station...", 5000, 10);
+            case 11: GameTextForPlayer(playerid, "+$1000", 5000, 11);
+            case 12: GameTextForPlayer(playerid, "-$250", 5000, 12);
+            case 13: GameTextForPlayer(playerid, "INSANE STUNT BONUS: $500", 5000, 13);
+            case 14: GameTextForPlayer(playerid, "12:34", 5000, 14);
+            case 15: GameTextForPlayer(playerid, "~y~YOUR CONTROLS~n~~w~F1: Help Menu~n~F2: Options~n~F3: Statistics~n~ESC: Quit", 5000, 15);
+            case 16: GameTextForPlayer(playerid, "~g~YOUR TIPS~n~~w~Use /help for commands~n~Press H to enter vehicles~n~Press Y to accept offers", 5000, 16);
+            case 17: GameTextForPlayer(playerid, "~w~You have completed the mission, return to base for reward", 5000, 17);
         }
     }
-    else if (gTestType[playerid] == 1) // Formatted GameText for Player (about the player)
+    else if (gTestType[playerid] == 1) // Formatted GameText for Player
     {
         switch(gCurrentStyle[playerid])
         {
@@ -218,20 +222,20 @@ ShowCurrentStyle(playerid)
             case 4: GameTextForPlayer(playerid, "~p~Your Armor~n~~w~AP: %.1f", 5000, 4, armor);
             case 5: GameTextForPlayer(playerid, "~y~Your Score: %d~n~~w~Position: %d/%d", 5000, 5, score, 1, GetPlayerCount());
             case 6: GameTextForPlayer(playerid, "~b~Your Location~n~~w~%s", 5000, 6, "Los Santos");
-            case 7: GameTextForPlayer(playerid, "Vehicle: %s", 5000, 7, "NRG-500"); // Vehicle name style
-            case 8: GameTextForPlayer(playerid, "Area: %s", 5000, 8, "Grove Street"); // Location style
-            case 9: GameTextForPlayer(playerid, "Radio: %s", 5000, 9, "Los Santos"); // Radio name
-            case 10: GameTextForPlayer(playerid, "Finding: %s...", 5000, 10, "Station"); // Radio switch
-            case 11: GameTextForPlayer(playerid, "+$%d", 5000, 11, 1000); // Positive money
-            case 12: GameTextForPlayer(playerid, "-$%d", 5000, 12, 250); // Negative money
-            case 13: GameTextForPlayer(playerid, "%s STUNT BONUS: $%d", 5000, 13, "INSANE", 500); // Stunt bonus
-            case 14: GameTextForPlayer(playerid, "%02d:%02d", 5000, 14, gettime() / 60 % 60, gettime() % 60); // Clock style
-            case 15: GameTextForPlayer(playerid, "~y~YOUR CONTROLS~n~~w~%s: Help Menu~n~%s: Options~n~%s: Statistics~n~%s: Quit", 5000, 15, "F1", "F2", "F3", "ESC"); // Popup style
-            case 16: GameTextForPlayer(playerid, "~g~YOUR TIPS~n~~w~Current Score: %d~n~Health: %.1f~n~Armor: %.1f", 5000, 16, score, health, armor); // Lower popup style
-            case 17: GameTextForPlayer(playerid, "~w~%s, your mission is complete the reward is $%d", 5000, 17, pname, 1000); // Subtitles style
+            case 7: GameTextForPlayer(playerid, "Vehicle: %s", 5000, 7, "NRG-500");
+            case 8: GameTextForPlayer(playerid, "Area: %s", 5000, 8, "Grove Street");
+            case 9: GameTextForPlayer(playerid, "Radio: %s", 5000, 9, "Los Santos");
+            case 10: GameTextForPlayer(playerid, "Finding: %s...", 5000, 10, "Station"); 
+            case 11: GameTextForPlayer(playerid, "+$%d", 5000, 11, 1000); 
+            case 12: GameTextForPlayer(playerid, "-$%d", 5000, 12, 250); 
+            case 13: GameTextForPlayer(playerid, "%s STUNT BONUS: $%d", 5000, 13, "INSANE", 500); 
+            case 14: GameTextForPlayer(playerid, "%02d:%02d", 5000, 14, gettime() / 60 % 60, gettime() % 60); 
+            case 15: GameTextForPlayer(playerid, "~y~YOUR CONTROLS~n~~w~%s: Help Menu~n~%s: Options~n~%s: Statistics~n~%s: Quit", 5000, 15, "F1", "F2", "F3", "ESC");
+            case 16: GameTextForPlayer(playerid, "~g~YOUR TIPS~n~~w~Current Score: %d~n~Health: %.1f~n~Armor: %.1f", 5000, 16, score, health, armor);
+            case 17: GameTextForPlayer(playerid, "~w~%s, your mission is complete the reward is $%d", 5000, 17, pname, 1000);
         }
     }
-    else if (gTestType[playerid] == 2) // Normal GameText for All (general info)
+    else if (gTestType[playerid] == 2) // Normal GameText for All
     {
         switch(gCurrentStyle[playerid])
         {
@@ -242,20 +246,20 @@ ShowCurrentStyle(playerid)
             case 4: GameTextForAll("~p~ADMIN ANNOUNCEMENT~n~~w~Rules Updated", 5000, 4);
             case 5: GameTextForAll("~y~SERVER STATUS~n~~w~Online: 50/100", 5000, 5);
             case 6: GameTextForAll("~b~WEATHER UPDATE~n~~w~Sunny", 5000, 6);
-            case 7: GameTextForAll("New Vehicles Available", 5000, 7); // Vehicle name style
-            case 8: GameTextForAll("Los Santos Derby", 5000, 8); // Location style
-            case 9: GameTextForAll("Radio: Server FM", 5000, 9); // Radio name
-            case 10: GameTextForAll("Changing: Weather...", 5000, 10); // Radio switch
-            case 11: GameTextForAll("+$10000 Prize Pool", 5000, 11); // Positive money
-            case 12: GameTextForAll("-$5000 Entry Fee", 5000, 12); // Negative money
-            case 13: GameTextForAll("SERVER EVENT: $1000 PRIZE", 5000, 13); // Stunt bonus
-            case 14: GameTextForAll("12:34", 5000, 14); // Clock style
-            case 15: GameTextForAll("~y~SERVER RULES~n~~w~No Cheating~n~No Spamming~n~Be Respectful~n~Have Fun", 5000, 15); // Popup style
-            case 16: GameTextForAll("~g~SERVER NEWS~n~~w~New weapons added~n~Map updated~n~Events every hour", 5000, 16); // Lower popup style
-            case 17: GameTextForAll("~w~Upcoming server maintenance, please save your progress", 5000, 17); // Subtitles style
+            case 7: GameTextForAll("New Vehicles Available", 5000, 7);
+            case 8: GameTextForAll("Los Santos Derby", 5000, 8); 
+            case 9: GameTextForAll("Radio: Server FM", 5000, 9); 
+            case 10: GameTextForAll("Changing: Weather...", 5000, 10);
+            case 11: GameTextForAll("+$10000 Prize Pool", 5000, 11); 
+            case 12: GameTextForAll("-$5000 Entry Fee", 5000, 12); 
+            case 13: GameTextForAll("SERVER EVENT: $1000 PRIZE", 5000, 13);
+            case 14: GameTextForAll("12:34", 5000, 14); 
+            case 15: GameTextForAll("~y~SERVER RULES~n~~w~No Cheating~n~No Spamming~n~Be Respectful~n~Have Fun", 5000, 15); 
+            case 16: GameTextForAll("~g~SERVER NEWS~n~~w~New weapons added~n~Map updated~n~Events every hour", 5000, 16);
+            case 17: GameTextForAll("~w~Upcoming server maintenance, please save your progress", 5000, 17); 
         }
     }
-    else if (gTestType[playerid] == 3) // Formatted GameText for All (general info)
+    else if (gTestType[playerid] == 3) // Formatted GameText for All
     {
         switch(gCurrentStyle[playerid])
         {
@@ -266,21 +270,20 @@ ShowCurrentStyle(playerid)
             case 4: GameTextForAll("~p~ADMIN ANNOUNCEMENT~n~~w~%s updated", 5000, 4, "Server Rules");
             case 5: GameTextForAll("~y~SERVER STATUS~n~~w~Online: %d/%d", 5000, 5, GetPlayerCount(), GetMaxPlayers());
             case 6: GameTextForAll("~b~WEATHER UPDATE~n~~w~%s", 5000, 6, "Thunderstorm");
-            case 7: GameTextForAll("%s now available", 5000, 7, "New Vehicles"); // Vehicle name style
-            case 8: GameTextForAll("%s Event Area", 5000, 8, "Los Santos"); // Location style
-            case 9: GameTextForAll("Radio: %s", 5000, 9, "Server FM"); // Radio name
-            case 10: GameTextForAll("Changing: %s...", 5000, 10, "Server Time"); // Radio switch
-            case 11: GameTextForAll("+$%d Prize Pool", 5000, 11, 10000); // Positive money
-            case 12: GameTextForAll("-$%d Entry Fee", 5000, 12, 5000); // Negative money
-            case 13: GameTextForAll("%s EVENT: $%d PRIZE", 5000, 13, "SERVER", 1000); // Stunt bonus
-            case 14: GameTextForAll("%02d:%02d", 5000, 14, gettime() / 60 % 60, gettime() % 60); // Clock style
-            case 15: GameTextForAll("~y~SERVER INFO~n~~w~Online: %d~n~Events: %d/day~n~Updates: Weekly", 5000, 15, GetPlayerCount(), 5); // Popup style
-            case 16: GameTextForAll("~g~SERVER NEWS~n~~w~New %s added~n~Map %s~n~Next event: %d min", 5000, 16, "weapons", "updated", 30); // Lower popup style
-            case 17: GameTextForAll("~w~%s Event starting, the pize pool is $%d", 5000, 17, "Stunt", 5000); // Subtitles style
+            case 7: GameTextForAll("%s now available", 5000, 7, "New Vehicles"); 
+            case 8: GameTextForAll("%s Event Area", 5000, 8, "Los Santos"); 
+            case 9: GameTextForAll("Radio: %s", 5000, 9, "Server FM"); 
+            case 10: GameTextForAll("Changing: %s...", 5000, 10, "Server Time"); 
+            case 11: GameTextForAll("+$%d Prize Pool", 5000, 11, 10000); 
+            case 12: GameTextForAll("-$%d Entry Fee", 5000, 12, 5000); 
+            case 13: GameTextForAll("%s EVENT: $%d PRIZE", 5000, 13, "SERVER", 1000); 
+            case 14: GameTextForAll("%02d:%02d", 5000, 14, gettime() / 60 % 60, gettime() % 60);
+            case 15: GameTextForAll("~y~SERVER INFO~n~~w~Online: %d~n~Events: %d/day~n~Updates: Weekly", 5000, 15, GetPlayerCount(), 5); 
+            case 16: GameTextForAll("~g~SERVER NEWS~n~~w~New %s added~n~Map %s~n~Next event: %d min", 5000, 16, "weapons", "updated", 30); 
+            case 17: GameTextForAll("~w~%s Event starting, the pize pool is $%d", 5000, 17, "Stunt", 5000);
         }
     }
     
-    // Schedule next style to be shown after 2.5 seconds
     gTestActive[playerid] = SetTimerEx("ContinueStyleTest", 2500, false, "d", playerid);
 }
 
