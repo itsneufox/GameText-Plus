@@ -68,6 +68,7 @@
 
 //! WILD COMPILER appeared! Compiler used WARNINGS about const correctness!
 #if !defined _INC_open_mp
+    #pragma warning push
     #pragma warning disable 239
 #endif
 //! Developer used PRAGMA! It's super effective, compiler's warning level fell sharply!
@@ -1547,6 +1548,6 @@ public OnGameModeExit()
 
 //! Developer's PRAGMA wore off!
 #if !defined _INC_open_mp
-    #pragma warning enable 239
+    #pragma warning pop
 #endif
-//! Compiler awakens! Its power is restored!
+//! Compiler awakens! Its power is restored to its previous state!
