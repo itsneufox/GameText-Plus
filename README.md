@@ -59,9 +59,8 @@ GameTextForPlayer(playerid, "K-Rose", 3000, 9);
 
 ## Testing Tools
 
-The package includes comprehensive testing scripts for both platforms:
+The package includes a comprehensive testing script:
 
-### SA-MP Test (`samp_test.pwn`)
 ### open.mp Test (`omp_test.pwn`)
 
 ### Test Commands
@@ -69,14 +68,15 @@ The package includes comprehensive testing scripts for both platforms:
 | Command | Description | Usage |
 |---------|-------------|--------|
 | `/test` | Initiate style showcase | Shows all styles sequentially |
-| `/next` | View next style | Advances to next style in showcase |
 | `/stop` | End demonstration | Terminates current showcase |
 
 ## Special Thanks
 
-- @AmyrAhmady - For the idea and the opportunity.
+- @AmyrAhmady - For the idea and the opportunity and also the updated Assembly code
+- @Sreyas-Sreelal - For the Assembly code
 - @edgyaf - for the textdraw's fader functionality
 - @imshooter - for the creation of Style 16
+- @Vince0789 - for the creation of Style 17
 - @Y_Less - Original fixes.inc
 
 ## License
