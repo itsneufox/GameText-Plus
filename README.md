@@ -11,9 +11,11 @@ It introduces enhanced styling options, improved functionality, and seamless int
 
 ## Key Features
 
-- Drop-in replacement for native GameText functions
-- Fader functionality integrated
-- Full SA-MP and open.mp compatibility
+- **18 Total Styles**: Native styles (0-6) plus 11 additional custom styles (7-17)
+- **Fade Effects**: Smooth fade-in and fade-out animations for text displays
+- **Format Support**: Use var args in all GameText functions
+- **Drop-in Replacement**: Works as a direct replacement for native GameText functions
+- **Full Compatibility**: Works with both SA-MP and open.mp
 
 ## Installation
 
@@ -42,14 +44,26 @@ GameText+ seamlessly replaces native functions while providing enhanced function
 Some examples:
 
 ```pawn
-// Show GameText to all players using location style
-GameTextForAll("Grove Street", 5000, 8);
+// Normal GameText
 
-// Show money earned with positive money style
+GameTextForAll("Infernus", 3000, 7);
+
+GameTextForAll("Los Santos", 3000, 8);
+
 GameTextForPlayer(playerid, "+$50,000", 3000, 11);
 
-// Display radio station with radio style
-GameTextForPlayer(playerid, "K-Rose", 3000, 9);
+GameTextForPlayer(playerid, "-$25,000", 3000, 12);
+
+
+// With var args
+
+GameTextForAll("Mission Passed!~n~Everyone, get out!", 5000, 15);
+
+GameTextForAll("Follow the damn train, %s!", 5000, 17, "CJ");
+
+GameTextForPlayer(playerid, "Money: $%d", 3000, 13, 999999);
+
+GameTextForPlayer(playerid, "Mission Passed!~n~Respect +%d!", 5000, 15, 1000);
 
 ```
 
