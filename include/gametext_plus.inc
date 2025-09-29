@@ -1064,11 +1064,11 @@ stock FIXES_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:..
                 #emit LCTRL 5
                 #emit SCTRL 4
                 
-                return GameTextForPlayer(playerid, string, time, style);
+                return BAD_GameTextForPlayer(playerid, string, time, style);
             }
             else
             {
-                return GameTextForPlayer(playerid, text, time, style);
+                return BAD_GameTextForPlayer(playerid, text, time, style);
             }
         }
     #endif
@@ -1209,11 +1209,11 @@ stock FIXES_GameTextForAll(const text[], time, style, {Float, _}:...)
                 #emit LCTRL 5
                 #emit SCTRL 4
                 
-                return GameTextForAll(string, time, style);
+                return BAD_GameTextForAll(string, time, style);
             }
             else
             {
-                return GameTextForAll(text, time, style);
+                return BAD_GameTextForAll(text, time, style);
             }
         }
     #endif
