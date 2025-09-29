@@ -1022,7 +1022,12 @@ stock FIXES_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:..
 {
     if (!IsPlayerConnected(playerid)) return false;
 
-    if (!(GAMETEXT_STYLE_MIN <= style <= GAMETEXT_STYLE_MAX)) return false;
+    #if defined OVERRIDE_NATIVE_GAMETEXT
+        if (!(GAMETEXT_STYLE_MIN <= style <= GAMETEXT_STYLE_MAX)) return false;
+    #else
+        // Allow native styles 0-6 to pass through to native functions
+        if (!(0 <= style <= GAMETEXT_STYLE_MAX)) return false;
+    #endif
 
     const static_args = 4;
     const args_diff = (3 - static_args) * 4; // format's static args end at index 3, current function's end at static_arg_count. Also * 4 because cells are 4 bytes
@@ -1162,7 +1167,12 @@ stock FIXES_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:..
  */
 stock FIXES_GameTextForAll(const text[], time, style, {Float, _}:...)
 {
-    if (!(GAMETEXT_STYLE_MIN <= style <= GAMETEXT_STYLE_MAX)) return false;
+    #if defined OVERRIDE_NATIVE_GAMETEXT
+        if (!(GAMETEXT_STYLE_MIN <= style <= GAMETEXT_STYLE_MAX)) return false;
+    #else
+        // Allow native styles 0-6 to pass through to native functions
+        if (!(0 <= style <= GAMETEXT_STYLE_MAX)) return false;
+    #endif
 
     const static_args = 3;
     const args_diff = (3 - static_args) * 4; // format's static args end at index 3, current function's end at static_arg_count. Also * 4 because cells are 4 bytes
