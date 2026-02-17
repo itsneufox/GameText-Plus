@@ -1,11 +1,11 @@
 /*
- *   _______  _______  __   __  _______  _______  _______  __   __  _______    _    
- *  |    ___||   _   ||  |_|  ||    ___||_     _||    ___||  |_|  ||_     _| _| |_  
- *  |   | __ |  | |  ||       ||   |___   |   |  |   |___ |       |  |   |  |_   _| 
- *  |   ||  ||  |_|  ||       ||    ___|  |   |  |    ___| |     |   |   |    |_|   
- *  |   |_| ||   _   || ||_|| ||   |___   |   |  |   |___ |   _   |  |   |  
- *  |_______||__| |__||_|   |_||_______|  |___|  |_______||__| |__|  |___|  
- *  
+ *   _______  _______  __   __  _______  _______  _______  __   __  _______    _
+ *  |    ___||   _   ||  |_|  ||    ___||_     _||    ___||  |_|  ||_     _| _| |_
+ *  |   | __ |  | |  ||       ||   |___   |   |  |   |___ |       |  |   |  |_   _|
+ *  |   ||  ||  |_|  ||       ||    ___|  |   |  |    ___| |     |   |   |    |_|
+ *  |   |_| ||   _   || ||_|| ||   |___   |   |  |   |___ |   _   |  |   |
+ *  |_______||__| |__||_|   |_||_______|  |___|  |_______||__| |__|  |___|
+ *
  *  GameText+ created and maintained by itsneufox (v1.2.0)
 
  *  Textdraws originally created by Y_Less for fixes.inc
@@ -63,13 +63,15 @@
     #if !defined TextDrawColour
         #define TextDrawColour TextDrawColor
     #endif
-    
+
 #endif
 
 //! WILD COMPILER appeared! Compiler used WARNINGS about const correctness!
-#if !defined _INC_open_mp
-    #pragma warning push
-    #pragma warning disable 239
+#if !defined _INC_open_mp && defined __PawnBuild
+    #if __PawnBuild > 4
+        #pragma warning push
+        #pragma warning disable 239
+    #endif
 #endif
 //! Developer used PRAGMA! It's super effective, compiler's warning level fell sharply!
 
@@ -78,43 +80,43 @@
 //==========================================================================
 
 #if defined OVERRIDE_NATIVE_GAMETEXT
-    #define GAMETEXT_STYLE_MIN      0
+    #define MIN_GAMETEXT_STYLE      0
 #else
-    #define GAMETEXT_STYLE_MIN      7
+    #define MIN_GAMETEXT_STYLE      7
 #endif
 
 #define     MAX_GAMETEXT_LENGTH     256
-#define     GAMETEXT_LEGACY         6 
-#define     GAMETEXT_STYLE_MAX      17
+#define     GAMETEXT_LEGACY         6
+#define     MAX_GAMETEXT_STYLE      17
 #define     FADE_INTERVAL           50
 #define     FADE_ALPHA_STEP         0x12
 
-static 
-    Text:gs_GameTextStyle[GAMETEXT_STYLE_MAX + 1],
-    PlayerText:gs_PlayerGameTextStyle[MAX_PLAYERS][GAMETEXT_STYLE_MAX + 1],
-    gs_GameTextTimer[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1],
-    gs_GameTextFadeOutTimer[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1],
-    gs_GameTextFadeInTimer[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1],
-    gs_GameTextOriginalColor[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1],
-    gs_GameTextOriginalBGColor[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1],
-    gs_GameTextOriginalBoxColor[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1],
-    bool:gs_GameTextIsFadingOut[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1],
-    bool:gs_GameTextIsFadingIn[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1]
+static
+    Text:gs_GameTextStyle[MAX_GAMETEXT_STYLE + 1],
+    PlayerText:gs_PlayerGameTextStyle[MAX_PLAYERS][MAX_GAMETEXT_STYLE + 1],
+    gs_GameTextTimer[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1],
+    gs_GameTextFadeOutTimer[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1],
+    gs_GameTextFadeInTimer[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1],
+    gs_GameTextOriginalColor[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1],
+    gs_GameTextOriginalBGColor[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1],
+    gs_GameTextOriginalBoxColor[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1],
+    bool:gs_GameTextIsFadingOut[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1],
+    bool:gs_GameTextIsFadingIn[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1]
 ;
 
 //==========================================================================
 //                          FUNCTION REMAPPING
 //==========================================================================
 
-#if defined _ALS_GameTextForPlayer 
+#if defined _ALS_GameTextForPlayer
     #error _ALS_GameTextForPlayer defined
 #endif
-native BAD_GameTextForPlayer(playerid, const string[], time, style) = GameTextForPlayer;
+native ORIG_GameTextForPlayer(playerid, const string[], time, style) = GameTextForPlayer;
 
 #if defined _ALS_GameTextForAll
     #error _ALS_GameTextForAll defined
 #endif
-native BAD_GameTextForAll(const string[], time, style) = GameTextForAll;
+native ORIG_GameTextForAll(const string[], time, style) = GameTextForAll;
 
 //==========================================================================
 //                       TEXTDRAW COLOR STORAGE
@@ -125,7 +127,7 @@ native BAD_GameTextForAll(const string[], time, style) = GameTextForAll;
  * SA-MP doesn't provide native getter functions for TextDraw colors
  */
 #if !defined _INC_open_mp
-    static 
+    static
         gs_TextDrawColors[MAX_TEXT_DRAWS],
         gs_TextDrawBGColors[MAX_TEXT_DRAWS],
         gs_TextDrawBoxColors[MAX_TEXT_DRAWS],
@@ -134,57 +136,69 @@ native BAD_GameTextForAll(const string[], time, style) = GameTextForAll;
         gs_PlayerTextDrawBoxColors[MAX_PLAYERS][MAX_PLAYER_TEXT_DRAWS]
     ;
 
-    stock SaveTextDrawColour(Text:text, color) {
+    stock SaveTextDrawColour(Text:text, color)
+    {
         gs_TextDrawColors[_:text] = color;
         return color;
     }
 
-    stock SaveTextDrawBackgroundColour(Text:text, color) {
+    stock SaveTextDrawBackgroundColour(Text:text, color)
+    {
         gs_TextDrawBGColors[_:text] = color;
         return color;
     }
 
-    stock SaveTextDrawBoxColour(Text:text, color) {
+    stock SaveTextDrawBoxColour(Text:text, color)
+    {
         gs_TextDrawBoxColors[_:text] = color;
         return color;
     }
 
-    stock SavePlayerTextDrawColour(playerid, PlayerText:text, color) {
+    stock SavePlayerTextDrawColour(playerid, PlayerText:text, color)
+    {
         gs_PlayerTextDrawColors[playerid][_:text] = color;
         return color;
     }
 
-    stock SavePlayerTextDrawBackgroundColour(playerid, PlayerText:text, color) {
+    stock SavePlayerTextDrawBackgroundCol(playerid, PlayerText:text, color)
+    {
         gs_PlayerTextDrawBGColors[playerid][_:text] = color;
         return color;
     }
 
-    stock SavePlayerTextDrawBoxColour(playerid, PlayerText:text, color) {
+    stock SavePlayerTextDrawBoxColour(playerid, PlayerText:text, color)
+    {
         gs_PlayerTextDrawBoxColors[playerid][_:text] = color;
         return color;
     }
 
-    stock TextDrawGetColour(Text:text) {
+    stock TextDrawGetColour(Text:text)
+    {
         return gs_TextDrawColors[_:text];
     }
 
-    stock TextDrawGetBackgroundColour(Text:text) {
+    stock TextDrawGetBackgroundColour(Text:text)
+    {
         return gs_TextDrawBGColors[_:text];
     }
 
-    stock TextDrawGetBoxColour(Text:text) {
+    stock TextDrawGetBoxColour(Text:text)
+    {
         return gs_TextDrawBoxColors[_:text];
     }
 
-    stock PlayerTextDrawGetColour(playerid, PlayerText:text) {
+    stock PlayerTextDrawGetColour(playerid, PlayerText:text)
+    {
         return gs_PlayerTextDrawColors[playerid][_:text];
     }
 
-    stock PlayerTextDrawGetBackgroundColour(playerid, PlayerText:text) {
+    stock PlayerTextDrawGetBackgroundCol(playerid, PlayerText:text)
+    {
         return gs_PlayerTextDrawBGColors[playerid][_:text];
     }
 
-    stock PlayerTextDrawGetBoxColour(playerid, PlayerText:text) {
+    stock PlayerTextDrawGetBoxColour(playerid, PlayerText:text)
+    {
         return gs_PlayerTextDrawBoxColors[playerid][_:text];
     }
 #endif
@@ -199,15 +213,12 @@ native BAD_GameTextForAll(const string[], time, style) = GameTextForAll;
  */
 static stock GameTextEx(playerid)
 {
-    new
-        EMPTY_STRING[2] = " "
-    ;
-    
+    new EMPTY_STRING[2] = " ";
+
     if (playerid == INVALID_PLAYER_ID)
     {
-        new 
-            Text:t
-        ;
+        new Text:t;
+
          #if defined OVERRIDE_NATIVE_GAMETEXT
             // Native style 0
             t = gs_GameTextStyle[0] = TextDrawCreate(320.0, 214.0, EMPTY_STRING);
@@ -222,7 +233,6 @@ static stock GameTextEx(playerid)
                 TextDrawBackgroundColour(t, 0x000000AA);
                 TextDrawBoxColour(t, 0x00000000);
             #endif
-            TextDrawSetShadow(t, 0);
             TextDrawSetOutline(t, 2);
             TextDrawFont(t, TEXT_DRAW_FONT:3);
             TextDrawSetProportional(t, true);
@@ -242,7 +252,6 @@ static stock GameTextEx(playerid)
                 TextDrawBackgroundColour(t, 0x000000AA);
                 TextDrawBoxColour(t, 0x00000000);
             #endif
-            TextDrawSetShadow(t, 0);
             TextDrawSetOutline(t, 2);
             TextDrawFont(t, TEXT_DRAW_FONT:3);
             TextDrawSetProportional(t, true);
@@ -262,7 +271,6 @@ static stock GameTextEx(playerid)
                 TextDrawBackgroundColour(t, 0x000000AA);
                 TextDrawBoxColour(t, 0x00000000);
             #endif
-            TextDrawSetShadow(t, 0);
             TextDrawSetOutline(t, 3);
             TextDrawFont(t, TEXT_DRAW_FONT:0);
             TextDrawSetProportional(t, true);
@@ -282,7 +290,6 @@ static stock GameTextEx(playerid)
                 TextDrawBackgroundColour(t, 0x000000AA);
                 TextDrawBoxColour(t, 0x00000000);
             #endif
-            TextDrawSetShadow(t, 0);
             TextDrawSetOutline(t, 2);
             TextDrawFont(t, TEXT_DRAW_FONT:2);
             TextDrawSetProportional(t, true);
@@ -302,7 +309,6 @@ static stock GameTextEx(playerid)
                 TextDrawBackgroundColour(t, 0x000000AA);
                 TextDrawBoxColour(t, 0x00000000);
             #endif
-            TextDrawSetShadow(t, 0);
             TextDrawSetOutline(t, 2);
             TextDrawFont(t, TEXT_DRAW_FONT:2);
             TextDrawSetProportional(t, true);
@@ -322,7 +328,6 @@ static stock GameTextEx(playerid)
                 TextDrawBackgroundColour(t, 0x000000AA);
                 TextDrawBoxColour(t, 0x00000000);
             #endif
-            TextDrawSetShadow(t, 0);
             TextDrawSetOutline(t, 2);
             TextDrawFont(t, TEXT_DRAW_FONT:2);
             TextDrawSetProportional(t, true);
@@ -342,7 +347,6 @@ static stock GameTextEx(playerid)
                 TextDrawBackgroundColour(t, 0x000000AA);
                 TextDrawBoxColour(t, 0x00000000);
             #endif
-            TextDrawSetShadow(t, 0);
             TextDrawSetOutline(t, 2);
             TextDrawFont(t, TEXT_DRAW_FONT:3);
             TextDrawSetProportional(t, true);
@@ -363,7 +367,6 @@ static stock GameTextEx(playerid)
             TextDrawBackgroundColour(t, 0x000000AA);
             TextDrawBoxColour(t, 0x00000000);
         #endif
-        TextDrawSetShadow(t, 0);
         TextDrawSetOutline(t, 2);
         TextDrawFont(t, TEXT_DRAW_FONT:2);
         TextDrawSetProportional(t, true);
@@ -383,7 +386,6 @@ static stock GameTextEx(playerid)
             TextDrawBackgroundColour(t, 0x000000AA);
             TextDrawBoxColour(t, 0x00000000);
         #endif
-        TextDrawSetShadow(t, 0);
         TextDrawSetOutline(t, 2);
         TextDrawFont(t, TEXT_DRAW_FONT:0);
         TextDrawSetProportional(t, true);
@@ -403,7 +405,6 @@ static stock GameTextEx(playerid)
             TextDrawBackgroundColour(t, 0x000000AA);
             TextDrawBoxColour(t, 0x00000000);
         #endif
-        TextDrawSetShadow(t, 0);
         TextDrawSetOutline(t, 1);
         TextDrawFont(t, TEXT_DRAW_FONT:2);
         TextDrawSetProportional(t, true);
@@ -423,7 +424,6 @@ static stock GameTextEx(playerid)
             TextDrawBackgroundColour(t, 0x000000AA);
             TextDrawBoxColour(t, 0x00000000);
         #endif
-        TextDrawSetShadow(t, 0);
         TextDrawSetOutline(t, 1);
         TextDrawFont(t, TEXT_DRAW_FONT:2);
         TextDrawSetProportional(t, true);
@@ -443,7 +443,6 @@ static stock GameTextEx(playerid)
             TextDrawBackgroundColour(t, 0x000000AA);
             TextDrawBoxColour(t, 0x00000000);
         #endif
-        TextDrawSetShadow(t, 0);
         TextDrawSetOutline(t, 2);
         TextDrawFont(t, TEXT_DRAW_FONT:3);
         TextDrawSetProportional(t, false);
@@ -463,7 +462,6 @@ static stock GameTextEx(playerid)
             TextDrawBackgroundColour(t, 0x000000AA);
             TextDrawBoxColour(t, 0x00000000);
         #endif
-        TextDrawSetShadow(t, 0);
         TextDrawSetOutline(t, 2);
         TextDrawFont(t, TEXT_DRAW_FONT:3);
         TextDrawSetProportional(t, false);
@@ -475,11 +473,11 @@ static stock GameTextEx(playerid)
         TextDrawLetterSize(t, 0.58, 2.42);
         TextDrawAlignment(t, TEXT_DRAW_ALIGN:2);
         #if !defined _INC_open_mp
-            TextDrawColour(t, SaveTextDrawColour(t, 0xDDDDDBFF));
+            TextDrawColour(t, SaveTextDrawColour(t, 0xE1E1E1FF));
             TextDrawBackgroundColour(t, SaveTextDrawBackgroundColour(t, 0x000000AA));
             TextDrawBoxColour(t, SaveTextDrawBoxColour(t, 0x00000000));
         #else
-            TextDrawColour(t, 0xDDDDDBFF);
+            TextDrawColour(t, 0xE1E1E1FF);
             TextDrawBackgroundColour(t, 0x000000AA);
             TextDrawBoxColour(t, 0x00000000);
         #endif
@@ -495,19 +493,18 @@ static stock GameTextEx(playerid)
         TextDrawLetterSize(t, 0.55, 2.2);
         TextDrawAlignment(t, TEXT_DRAW_ALIGN:3);
         #if !defined _INC_open_mp
-            TextDrawColour(t, SaveTextDrawColour(t, 0xC3C3C3FF));
+            TextDrawColour(t, SaveTextDrawColour(t, 0xE1E1E1FF));
             TextDrawBackgroundColour(t, SaveTextDrawBackgroundColour(t, 0x000000AA));
             TextDrawBoxColour(t, SaveTextDrawBoxColour(t, 0x00000000));
         #else
-            TextDrawColour(t, 0xC3C3C3FF);
+            TextDrawColour(t, 0xE1E1E1FF);
             TextDrawBackgroundColour(t, 0x000000AA);
             TextDrawBoxColour(t, 0x00000000);
         #endif
-        TextDrawSetShadow(t, 0);
         TextDrawSetOutline(t, 2);
         TextDrawFont(t, TEXT_DRAW_FONT:3);
         TextDrawSetProportional(t, false);
-        TextDrawUseBox(t, false);
+        TextDrawUseBox(t, true);
         TextDrawTextSize(t, 400.0, 20.0);
 
         // Style 15 (Notification Popup Style)
@@ -516,12 +513,12 @@ static stock GameTextEx(playerid)
         TextDrawAlignment(t, TEXT_DRAW_ALIGN:1);
         #if !defined _INC_open_mp
             TextDrawColour(t, SaveTextDrawColour(t, 0xFFFFFF96));
-            TextDrawBackgroundColour(t, SaveTextDrawBackgroundColour(t, 0x000000AA));
-            TextDrawBoxColour(t, SaveTextDrawBoxColour(t, 0x000000DD));
+            TextDrawBackgroundColour(t, SaveTextDrawBackgroundColour(t, 0x00000000));
+            TextDrawBoxColour(t, SaveTextDrawBoxColour(t, 0x00000080));
         #else
             TextDrawColour(t, 0xFFFFFF96);
-            TextDrawBackgroundColour(t, 0x000000AA);
-            TextDrawBoxColour(t, 0x000000DD);
+            TextDrawBackgroundColour(t, 0x00000000);
+            TextDrawBoxColour(t, 0x00000080);
         #endif
         TextDrawSetShadow(t, 0);
         TextDrawSetOutline(t, 0);
@@ -532,16 +529,16 @@ static stock GameTextEx(playerid)
 
         // Style 16 (Lower Notification Style)
         t = gs_GameTextStyle[16] = TextDrawCreate(28.0, 150.0, EMPTY_STRING);
-        TextDrawLetterSize(t, 0.416, 1.760);
+        TextDrawLetterSize(t, 0.42, 1.8);
         TextDrawAlignment(t, TEXT_DRAW_ALIGN:1);
         #if !defined _INC_open_mp
             TextDrawColour(t, SaveTextDrawColour(t, 0xFFFFFF96));
-            TextDrawBackgroundColour(t, SaveTextDrawBackgroundColour(t, 0x000000AA));
-            TextDrawBoxColour(t, SaveTextDrawBoxColour(t, 0x000000DD));
+            TextDrawBackgroundColour(t, SaveTextDrawBackgroundColour(t, 0x00000000));
+            TextDrawBoxColour(t, SaveTextDrawBoxColour(t, 0x00000080));
         #else
             TextDrawColour(t, 0xFFFFFF96);
-            TextDrawBackgroundColour(t, 0x000000AA);
-            TextDrawBoxColour(t, 0x000000DD);
+            TextDrawBackgroundColour(t, 0x00000000);
+            TextDrawBoxColour(t, 0x00000080);
         #endif
         TextDrawSetShadow(t, 0);
         TextDrawSetOutline(t, 0);
@@ -551,24 +548,24 @@ static stock GameTextEx(playerid)
         TextDrawTextSize(t, 212.0, 200.0);
 
         // Style 17 (Subtitles Style)
-        t = gs_GameTextStyle[17] = TextDrawCreate(380.0, 345.0, EMPTY_STRING);
-        TextDrawLetterSize(t, 0.45, 1.95);
+        t = gs_GameTextStyle[17] = TextDrawCreate(320.0, 368.1, EMPTY_STRING);
+        TextDrawLetterSize(t, 0.58, 2.38);
         TextDrawAlignment(t, TEXT_DRAW_ALIGN:2);
         #if !defined _INC_open_mp
             TextDrawColour(t, SaveTextDrawColour(t, 0xE1E1E1FF));
-            TextDrawBackgroundColour(t, SaveTextDrawBackgroundColour(t, 0x000000FF));
+            TextDrawBackgroundColour(t, SaveTextDrawBackgroundColour(t, 0x000000AA));
             TextDrawBoxColour(t, SaveTextDrawBoxColour(t, 0x00000000));
         #else
             TextDrawColour(t, 0xE1E1E1FF);
-            TextDrawBackgroundColour(t, 0x000000FF);
+            TextDrawBackgroundColour(t, 0x000000AA);
             TextDrawBoxColour(t, 0x00000000);
         #endif
-        TextDrawSetShadow(t, 0);
-        TextDrawSetOutline(t, 1);
+        TextDrawSetShadow(t, 2);
+        TextDrawSetOutline(t, 0);
         TextDrawFont(t, TEXT_DRAW_FONT:1);
         TextDrawSetProportional(t, true);
         TextDrawUseBox(t, true);
-        TextDrawTextSize(t, 70.0, 448.0);
+        TextDrawTextSize(t, 40.0, 460.0);
     }
     else
     {
@@ -581,14 +578,13 @@ static stock GameTextEx(playerid)
             PlayerTextDrawAlignment(playerid, pt, TEXT_DRAW_ALIGN:2);
             #if !defined _INC_open_mp
                 PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0x906210FF));
-                PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA));
+                PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundCol(playerid, pt, 0x000000AA));
                 PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, 0x00000000));
             #else
                 PlayerTextDrawColour(playerid, pt, 0x906210FF);
                 PlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA);
                 PlayerTextDrawBoxColour(playerid, pt, 0x00000000);
             #endif
-            PlayerTextDrawSetShadow(playerid, pt, 0);
             PlayerTextDrawSetOutline(playerid, pt, 2);
             PlayerTextDrawFont(playerid, pt, TEXT_DRAW_FONT:3);
             PlayerTextDrawSetProportional(playerid, pt, true);
@@ -601,14 +597,13 @@ static stock GameTextEx(playerid)
             PlayerTextDrawAlignment(playerid, pt, TEXT_DRAW_ALIGN:3);
             #if !defined _INC_open_mp
                 PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0x906210FF));
-                PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA));
+                PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundCol(playerid, pt, 0x000000AA));
                 PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, 0x00000000));
             #else
                 PlayerTextDrawColour(playerid, pt, 0x906210FF);
                 PlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA);
                 PlayerTextDrawBoxColour(playerid, pt, 0x00000000);
             #endif
-            PlayerTextDrawSetShadow(playerid, pt, 0);
             PlayerTextDrawSetOutline(playerid, pt, 2);
             PlayerTextDrawFont(playerid, pt, TEXT_DRAW_FONT:3);
             PlayerTextDrawSetProportional(playerid, pt, true);
@@ -621,14 +616,13 @@ static stock GameTextEx(playerid)
             PlayerTextDrawAlignment(playerid, pt, TEXT_DRAW_ALIGN:2);
             #if !defined _INC_open_mp
                 PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0xE1E1E1FF));
-                PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA));
+                PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundCol(playerid, pt, 0x000000AA));
                 PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, 0x00000000));
             #else
                 PlayerTextDrawColour(playerid, pt, 0xE1E1E1FF);
                 PlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA);
                 PlayerTextDrawBoxColour(playerid, pt, 0x00000000);
             #endif
-            PlayerTextDrawSetShadow(playerid, pt, 0);
             PlayerTextDrawSetOutline(playerid, pt, 3);
             PlayerTextDrawFont(playerid, pt, TEXT_DRAW_FONT:0);
             PlayerTextDrawSetProportional(playerid, pt, true);
@@ -641,14 +635,13 @@ static stock GameTextEx(playerid)
             PlayerTextDrawAlignment(playerid, pt, TEXT_DRAW_ALIGN:2);
             #if !defined _INC_open_mp
                 PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0x906210FF));
-                PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA));
+                PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundCol(playerid, pt, 0x000000AA));
                 PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, 0x00000000));
             #else
                 PlayerTextDrawColour(playerid, pt, 0x906210FF);
                 PlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA);
                 PlayerTextDrawBoxColour(playerid, pt, 0x00000000);
             #endif
-            PlayerTextDrawSetShadow(playerid, pt, 0);
             PlayerTextDrawSetOutline(playerid, pt, 2);
             PlayerTextDrawFont(playerid, pt, TEXT_DRAW_FONT:2);
             PlayerTextDrawSetProportional(playerid, pt, true);
@@ -661,14 +654,13 @@ static stock GameTextEx(playerid)
             PlayerTextDrawAlignment(playerid, pt, TEXT_DRAW_ALIGN:2);
             #if !defined _INC_open_mp
                 PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0x906210FF));
-                PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA));
+                PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundCol(playerid, pt, 0x000000AA));
                 PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, 0x00000000));
             #else
                 PlayerTextDrawColour(playerid, pt, 0x906210FF);
                 PlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA);
                 PlayerTextDrawBoxColour(playerid, pt, 0x00000000);
             #endif
-            PlayerTextDrawSetShadow(playerid, pt, 0);
             PlayerTextDrawSetOutline(playerid, pt, 2);
             PlayerTextDrawFont(playerid, pt, TEXT_DRAW_FONT:2);
             PlayerTextDrawSetProportional(playerid, pt, true);
@@ -681,14 +673,13 @@ static stock GameTextEx(playerid)
             PlayerTextDrawAlignment(playerid, pt, TEXT_DRAW_ALIGN:2);
             #if !defined _INC_open_mp
                 PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0xE1E1E1FF));
-                PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA));
+                PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundCol(playerid, pt, 0x000000AA));
                 PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, 0x00000000));
             #else
                 PlayerTextDrawColour(playerid, pt, 0xE1E1E1FF);
                 PlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA);
                 PlayerTextDrawBoxColour(playerid, pt, 0x00000000);
             #endif
-            PlayerTextDrawSetShadow(playerid, pt, 0);
             PlayerTextDrawSetOutline(playerid, pt, 2);
             PlayerTextDrawFont(playerid, pt, TEXT_DRAW_FONT:2);
             PlayerTextDrawSetProportional(playerid, pt, true);
@@ -701,14 +692,13 @@ static stock GameTextEx(playerid)
             PlayerTextDrawAlignment(playerid, pt, TEXT_DRAW_ALIGN:2);
             #if !defined _INC_open_mp
                 PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0xACCBF1FF));
-                PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA));
+                PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundCol(playerid, pt, 0x000000AA));
                 PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, 0x00000000));
             #else
                 PlayerTextDrawColour(playerid, pt, 0xACCBF1FF);
                 PlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA);
                 PlayerTextDrawBoxColour(playerid, pt, 0x00000000);
             #endif
-            PlayerTextDrawSetShadow(playerid, pt, 0);
             PlayerTextDrawSetOutline(playerid, pt, 2);
             PlayerTextDrawFont(playerid, pt, TEXT_DRAW_FONT:3);
             PlayerTextDrawSetProportional(playerid, pt, true);
@@ -722,14 +712,13 @@ static stock GameTextEx(playerid)
         PlayerTextDrawAlignment(playerid, pt, TEXT_DRAW_ALIGN:3);
         #if !defined _INC_open_mp
             PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0x36682CFF));
-            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA));
+            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundCol(playerid, pt, 0x000000AA));
             PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, 0x00000000));
         #else
             PlayerTextDrawColour(playerid, pt, 0x36682CFF);
             PlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA);
             PlayerTextDrawBoxColour(playerid, pt, 0x00000000);
         #endif
-        PlayerTextDrawSetShadow(playerid, pt, 0);
         PlayerTextDrawSetOutline(playerid, pt, 2);
         PlayerTextDrawFont(playerid, pt, TEXT_DRAW_FONT:2);
         PlayerTextDrawSetProportional(playerid, pt, true);
@@ -742,14 +731,13 @@ static stock GameTextEx(playerid)
         PlayerTextDrawAlignment(playerid, pt, TEXT_DRAW_ALIGN:3);
         #if !defined _INC_open_mp
             PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0xACCBF1FF));
-            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA));
+            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundCol(playerid, pt, 0x000000AA));
             PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, 0x00000000));
         #else
             PlayerTextDrawColour(playerid, pt, 0xACCBF1FF);
             PlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA);
             PlayerTextDrawBoxColour(playerid, pt, 0x00000000);
         #endif
-        PlayerTextDrawSetShadow(playerid, pt, 0);
         PlayerTextDrawSetOutline(playerid, pt, 2);
         PlayerTextDrawFont(playerid, pt, TEXT_DRAW_FONT:0);
         PlayerTextDrawSetProportional(playerid, pt, true);
@@ -762,14 +750,13 @@ static stock GameTextEx(playerid)
         PlayerTextDrawAlignment(playerid, pt, TEXT_DRAW_ALIGN:2);
         #if !defined _INC_open_mp
             PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0x906210FF));
-            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA));
+            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundCol(playerid, pt, 0x000000AA));
             PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, 0x00000000));
         #else
             PlayerTextDrawColour(playerid, pt, 0x906210FF);
             PlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA);
             PlayerTextDrawBoxColour(playerid, pt, 0x00000000);
         #endif
-        PlayerTextDrawSetShadow(playerid, pt, 0);
         PlayerTextDrawSetOutline(playerid, pt, 1);
         PlayerTextDrawFont(playerid, pt, TEXT_DRAW_FONT:2);
         PlayerTextDrawSetProportional(playerid, pt, true);
@@ -782,14 +769,13 @@ static stock GameTextEx(playerid)
         PlayerTextDrawAlignment(playerid, pt, TEXT_DRAW_ALIGN:2);
         #if !defined _INC_open_mp
             PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0x969696FF));
-            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA));
+            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundCol(playerid, pt, 0x000000AA));
             PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, 0x00000000));
         #else
             PlayerTextDrawColour(playerid, pt, 0x969696FF);
             PlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA);
             PlayerTextDrawBoxColour(playerid, pt, 0x00000000);
         #endif
-        PlayerTextDrawSetShadow(playerid, pt, 0);
         PlayerTextDrawSetOutline(playerid, pt, 1);
         PlayerTextDrawFont(playerid, pt, TEXT_DRAW_FONT:2);
         PlayerTextDrawSetProportional(playerid, pt, true);
@@ -802,14 +788,13 @@ static stock GameTextEx(playerid)
         PlayerTextDrawAlignment(playerid, pt, TEXT_DRAW_ALIGN:3);
         #if !defined _INC_open_mp
             PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0x36682CFF));
-            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA));
+            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundCol(playerid, pt, 0x000000AA));
             PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, 0x00000000));
         #else
             PlayerTextDrawColour(playerid, pt, 0x36682CFF);
             PlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA);
             PlayerTextDrawBoxColour(playerid, pt, 0x00000000);
         #endif
-        PlayerTextDrawSetShadow(playerid, pt, 0);
         PlayerTextDrawSetOutline(playerid, pt, 2);
         PlayerTextDrawFont(playerid, pt, TEXT_DRAW_FONT:3);
         PlayerTextDrawSetProportional(playerid, pt, false);
@@ -822,14 +807,13 @@ static stock GameTextEx(playerid)
         PlayerTextDrawAlignment(playerid, pt, TEXT_DRAW_ALIGN:3);
         #if !defined _INC_open_mp
             PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0xB4191DFF));
-            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA));
+            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundCol(playerid, pt, 0x000000AA));
             PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, 0x00000000));
         #else
             PlayerTextDrawColour(playerid, pt, 0xB4191DFF);
             PlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA);
             PlayerTextDrawBoxColour(playerid, pt, 0x00000000);
         #endif
-        PlayerTextDrawSetShadow(playerid, pt, 0);
         PlayerTextDrawSetOutline(playerid, pt, 2);
         PlayerTextDrawFont(playerid, pt, TEXT_DRAW_FONT:3);
         PlayerTextDrawSetProportional(playerid, pt, false);
@@ -841,11 +825,11 @@ static stock GameTextEx(playerid)
         PlayerTextDrawLetterSize(playerid, pt, 0.58, 2.42);
         PlayerTextDrawAlignment(playerid, pt, TEXT_DRAW_ALIGN:2);
         #if !defined _INC_open_mp
-            PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0xDDDDDBFF));
-            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA));
+            PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0xE1E1E1FF));
+            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundCol(playerid, pt, 0x000000AA));
             PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, 0x00000000));
         #else
-            PlayerTextDrawColour(playerid, pt, 0xDDDDDBFF);
+            PlayerTextDrawColour(playerid, pt, 0xE1E1E1FF);
             PlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA);
             PlayerTextDrawBoxColour(playerid, pt, 0x00000000);
         #endif
@@ -861,19 +845,18 @@ static stock GameTextEx(playerid)
         PlayerTextDrawLetterSize(playerid, pt, 0.55, 2.2);
         PlayerTextDrawAlignment(playerid, pt, TEXT_DRAW_ALIGN:3);
         #if !defined _INC_open_mp
-            PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0xC3C3C3FF));
-            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA));
+            PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0xE1E1E1FF));
+            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundCol(playerid, pt, 0x000000AA));
             PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, 0x00000000));
         #else
-            PlayerTextDrawColour(playerid, pt, 0xC3C3C3FF);
+            PlayerTextDrawColour(playerid, pt, 0xE1E1E1FF);
             PlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA);
             PlayerTextDrawBoxColour(playerid, pt, 0x00000000);
         #endif
-        PlayerTextDrawSetShadow(playerid, pt, 0);
         PlayerTextDrawSetOutline(playerid, pt, 2);
         PlayerTextDrawFont(playerid, pt, TEXT_DRAW_FONT:3);
         PlayerTextDrawSetProportional(playerid, pt, false);
-        PlayerTextDrawUseBox(playerid, pt, false);
+        PlayerTextDrawUseBox(playerid, pt, true);
         PlayerTextDrawTextSize(playerid, pt, 400.0, 20.0);
 
         // Style 15 (Notification Popup Style)
@@ -882,12 +865,12 @@ static stock GameTextEx(playerid)
         PlayerTextDrawAlignment(playerid, pt, TEXT_DRAW_ALIGN:1);
         #if !defined _INC_open_mp
             PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0xFFFFFF96));
-            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA));
-            PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, 0x000000DD));
+            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundCol(playerid, pt, 0x00000000));
+            PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, 0x00000080));
         #else
             PlayerTextDrawColour(playerid, pt, 0xFFFFFF96);
-            PlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA);
-            PlayerTextDrawBoxColour(playerid, pt, 0x000000DD);
+            PlayerTextDrawBackgroundColour(playerid, pt, 0x00000000);
+            PlayerTextDrawBoxColour(playerid, pt, 0x00000080);
         #endif
         PlayerTextDrawSetShadow(playerid, pt, 0);
         PlayerTextDrawSetOutline(playerid, pt, 0);
@@ -898,16 +881,16 @@ static stock GameTextEx(playerid)
 
         // Style 16 (Lower Notification Style)
         pt = gs_PlayerGameTextStyle[playerid][16] = CreatePlayerTextDraw(playerid, 28.0, 150.0, EMPTY_STRING);
-        PlayerTextDrawLetterSize(playerid, pt, 0.416, 1.760);
+        PlayerTextDrawLetterSize(playerid, pt, 0.42, 1.8);
         PlayerTextDrawAlignment(playerid, pt, TEXT_DRAW_ALIGN:1);
         #if !defined _INC_open_mp
             PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0xFFFFFF96));
-            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA));
-            PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, 0x000000DD));
+            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundCol(playerid, pt, 0x00000000));
+            PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, 0x00000080));
         #else
             PlayerTextDrawColour(playerid, pt, 0xFFFFFF96);
-            PlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA);
-            PlayerTextDrawBoxColour(playerid, pt, 0x000000DD);
+            PlayerTextDrawBackgroundColour(playerid, pt, 0x00000000);
+            PlayerTextDrawBoxColour(playerid, pt, 0x00000080);
         #endif
         PlayerTextDrawSetShadow(playerid, pt, 0);
         PlayerTextDrawSetOutline(playerid, pt, 0);
@@ -917,24 +900,24 @@ static stock GameTextEx(playerid)
         PlayerTextDrawTextSize(playerid, pt, 212.0, 200.0);
 
         // Style 17 (Subtitles Style)
-        pt = gs_PlayerGameTextStyle[playerid][17] = CreatePlayerTextDraw(playerid, 380.0, 345.0, EMPTY_STRING);
-        PlayerTextDrawLetterSize(playerid, pt, 0.45, 1.95);
+        pt = gs_PlayerGameTextStyle[playerid][17] = CreatePlayerTextDraw(playerid, 320.0, 368.1, EMPTY_STRING);
+        PlayerTextDrawLetterSize(playerid, pt, 0.58, 2.38);
         PlayerTextDrawAlignment(playerid, pt, TEXT_DRAW_ALIGN:2);
         #if !defined _INC_open_mp
             PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0xE1E1E1FF));
-            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundColour(playerid, pt, 0x000000FF));
+            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundCol(playerid, pt, 0x000000AA));
             PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, 0x00000000));
         #else
             PlayerTextDrawColour(playerid, pt, 0xE1E1E1FF);
-            PlayerTextDrawBackgroundColour(playerid, pt, 0x000000FF);
+            PlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA);
             PlayerTextDrawBoxColour(playerid, pt, 0x00000000);
         #endif
-        PlayerTextDrawSetShadow(playerid, pt, 0);
-        PlayerTextDrawSetOutline(playerid, pt, 1);
+        PlayerTextDrawSetShadow(playerid, pt, 2);
+        PlayerTextDrawSetOutline(playerid, pt, 0);
         PlayerTextDrawFont(playerid, pt, TEXT_DRAW_FONT:1);
         PlayerTextDrawSetProportional(playerid, pt, true);
         PlayerTextDrawUseBox(playerid, pt, true);
-        PlayerTextDrawTextSize(playerid, pt, 70.0, 448.0);
+        PlayerTextDrawTextSize(playerid, pt, 40.0, 460.0);
     }
     return true;
 }
@@ -947,7 +930,7 @@ static stock GameTextEx(playerid)
 forward OnHideGameText(playerid, styleid);
 public OnHideGameText(playerid, styleid)
 {
-    if (styleid == 14 || styleid == 9 || styleid == 10)
+    if (3 <= styleid <= 6 || 9 <= styleid <= 14 || styleid == 17)
     {
         if (playerid == MAX_PLAYERS)
         {
@@ -957,7 +940,7 @@ public OnHideGameText(playerid, styleid)
         else
         {
             PlayerTextDrawHide(playerid, gs_PlayerGameTextStyle[playerid][styleid]);
-            gs_GameTextTimer[styleid][playerid] = 0; 
+            gs_GameTextTimer[styleid][playerid] = 0;
         }
         return 1;
     }
@@ -966,9 +949,9 @@ public OnHideGameText(playerid, styleid)
     {
         if (playerid == MAX_PLAYERS)
         {
-            gs_GameTextOriginalColor[styleid][MAX_PLAYERS] = TextDrawGetColour(gs_GameTextStyle[styleid]); 
-            gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] = TextDrawGetBackgroundColour(gs_GameTextStyle[styleid]); 
-            gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] = TextDrawGetBoxColour(gs_GameTextStyle[styleid]); 
+            gs_GameTextOriginalColor[styleid][MAX_PLAYERS] = TextDrawGetColour(gs_GameTextStyle[styleid]);
+            gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] = TextDrawGetBackgroundColour(gs_GameTextStyle[styleid]);
+            gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] = TextDrawGetBoxColour(gs_GameTextStyle[styleid]);
         }
         else
         {
@@ -979,7 +962,7 @@ public OnHideGameText(playerid, styleid)
         gs_GameTextIsFadingOut[styleid][playerid] = true;
     }
 
-    OnFadeOutGameText(playerid, styleid, 
+    OnFadeOutGameText(playerid, styleid,
         gs_GameTextOriginalColor[styleid][playerid] & 0xFF,
         gs_GameTextOriginalBGColor[styleid][playerid] & 0xFF,
         gs_GameTextOriginalBoxColor[styleid][playerid] & 0xFF
@@ -996,14 +979,14 @@ static stock OnDestroyGameText(playerid)
 {
     if (playerid == INVALID_PLAYER_ID)
     {
-        for (new style = GAMETEXT_STYLE_MIN; style <= GAMETEXT_STYLE_MAX; style++)
+        for (new style = MIN_GAMETEXT_STYLE; style <= MAX_GAMETEXT_STYLE; style++)
         {
             TextDrawDestroy(gs_GameTextStyle[style]);
         }
     }
     else
     {
-        for (new style = GAMETEXT_STYLE_MIN; style <= GAMETEXT_STYLE_MAX; style++)
+        for (new style = MIN_GAMETEXT_STYLE; style <= MAX_GAMETEXT_STYLE; style++)
         {
             PlayerTextDrawDestroy(playerid, gs_PlayerGameTextStyle[playerid][style]);
         }
@@ -1016,33 +999,32 @@ static stock OnDestroyGameText(playerid)
  * @param playerid - Target player
  * @param text - Text to display
  * @param time - Duration in milliseconds (0 for permanent)
- * @param style - Style ID (0-6 for native, 7-15 for extended)
+ * @param style - Style ID (0-6 for native, 7-17 for extended)
  */
-stock FIXES_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
+stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
 {
     if (!IsPlayerConnected(playerid)) return false;
 
     #if defined OVERRIDE_NATIVE_GAMETEXT
-        if (!(GAMETEXT_STYLE_MIN <= style <= GAMETEXT_STYLE_MAX)) return false;
+        if (!(MIN_GAMETEXT_STYLE <= style <= MAX_GAMETEXT_STYLE)) return false;
     #else
         // Allow native styles 0-6 to pass through to native functions
-        if (!(0 <= style <= GAMETEXT_STYLE_MAX)) return false;
+        if (!(0 <= style <= MAX_GAMETEXT_STYLE)) return false;
     #endif
 
     const static_args = 4;
     const args_diff = (3 - static_args) * 4; // format's static args end at index 3, current function's end at static_arg_count. Also * 4 because cells are 4 bytes
 
-    static args;
+    static args, temp_string[256];
+    const string_size = sizeof(temp_string);
+
     args = numargs();
-    
+
     #if !defined OVERRIDE_NATIVE_GAMETEXT
         if (style <= GAMETEXT_LEGACY)
         {
             if (args > static_args)
             {
-                static string[256];
-                const string_size = sizeof(string);
-
                 while (--args >= 4)
                 {
                     #emit LCTRL 5
@@ -1056,48 +1038,50 @@ stock FIXES_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:..
 
                 #emit PUSH.S text
                 #emit PUSH.C string_size
-                #emit PUSH.C string
+                #emit PUSH.C temp_string
                 #emit LOAD.S.pri 8
                 #emit ADD.C args_diff
                 #emit PUSH.pri
                 #emit SYSREQ.C format
                 #emit LCTRL 5
                 #emit SCTRL 4
-                
-                return BAD_GameTextForPlayer(playerid, string, time, style);
+
+                return ORIG_GameTextForPlayer(playerid, temp_string, time, style);
             }
             else
             {
-                return BAD_GameTextForPlayer(playerid, text, time, style);
+                return ORIG_GameTextForPlayer(playerid, text, time, style);
             }
         }
+    #else
+        #pragma unused temp_string
     #endif
-    
+
     if (gs_GameTextTimer[style][playerid])
     {
         KillTimer(gs_GameTextTimer[style][playerid]);
         gs_GameTextTimer[style][playerid] = 0;
     }
-    
+
     if (gs_GameTextFadeInTimer[style][playerid])
     {
         KillTimer(gs_GameTextFadeInTimer[style][playerid]);
         gs_GameTextFadeInTimer[style][playerid] = 0;
     }
-    
+
     if (gs_GameTextFadeOutTimer[style][playerid])
     {
         KillTimer(gs_GameTextFadeOutTimer[style][playerid]);
         gs_GameTextFadeOutTimer[style][playerid] = 0;
     }
-    
+
     gs_GameTextIsFadingOut[style][playerid] = false;
     gs_GameTextIsFadingIn[style][playerid] = false;
-    
-    if (style != 14 && style != 9 && style != 10)
+
+    if (!(3 <= style <= 6) && !(9 <= style <= 14) && style != 17)
     {
         gs_GameTextOriginalColor[style][playerid] = PlayerTextDrawGetColour(playerid, gs_PlayerGameTextStyle[playerid][style]);
-        gs_GameTextOriginalBGColor[style][playerid] = PlayerTextDrawGetBackgroundColour(playerid, gs_PlayerGameTextStyle[playerid][style]);
+        gs_GameTextOriginalBGColor[style][playerid] = PlayerTextDrawGetBackgroundCol(playerid, gs_PlayerGameTextStyle[playerid][style]);
         gs_GameTextOriginalBoxColor[style][playerid] = PlayerTextDrawGetBoxColour(playerid, gs_PlayerGameTextStyle[playerid][style]);
     }
 
@@ -1126,7 +1110,7 @@ stock FIXES_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:..
         #emit SYSREQ.C format
         #emit LCTRL 5
         #emit SCTRL 4
-        
+
         PlayerTextDrawSetString(playerid, gs_PlayerGameTextStyle[playerid][style], string);
     }
     else
@@ -1140,7 +1124,7 @@ stock FIXES_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:..
         #endif
     }
 
-    if (style == 14 || style == 9 || style == 10)
+    if (3 <= style <= 6 || 9 <= style <= 14 || style == 17)
     {
         PlayerTextDrawShow(playerid, gs_PlayerGameTextStyle[playerid][style]);
     }
@@ -1149,12 +1133,12 @@ stock FIXES_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:..
         gs_GameTextIsFadingIn[style][playerid] = true;
         OnFadeInGameText(playerid, style, 0, 0, 0);
     }
-    
+
     if (time > 0)
     {
         gs_GameTextTimer[style][playerid] = SetTimerEx("OnHideGameText", time, false, "dd", playerid, style);
     }
-    
+
     return true;
 }
 
@@ -1163,31 +1147,30 @@ stock FIXES_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:..
  * Enhanced GameTextForAll with support for extended styles
  * @param text - Text to display
  * @param time - Duration in milliseconds (0 for permanent)
- * @param style - Style ID (0-6 for native, 7-15 for extended)
+ * @param style - Style ID (0-6 for native, 7-17 for extended)
  */
-stock FIXES_GameTextForAll(const text[], time, style, {Float, _}:...)
+stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
 {
     #if defined OVERRIDE_NATIVE_GAMETEXT
-        if (!(GAMETEXT_STYLE_MIN <= style <= GAMETEXT_STYLE_MAX)) return false;
+        if (!(MIN_GAMETEXT_STYLE <= style <= MAX_GAMETEXT_STYLE)) return false;
     #else
         // Allow native styles 0-6 to pass through to native functions
-        if (!(0 <= style <= GAMETEXT_STYLE_MAX)) return false;
+        if (!(0 <= style <= MAX_GAMETEXT_STYLE)) return false;
     #endif
 
     const static_args = 3;
     const args_diff = (3 - static_args) * 4; // format's static args end at index 3, current function's end at static_arg_count. Also * 4 because cells are 4 bytes
 
-    static args;
+    static args, temp_string[256];
+    const string_size = sizeof(temp_string);
+
     args = numargs();
-    
+
     #if !defined OVERRIDE_NATIVE_GAMETEXT
         if (style <= GAMETEXT_LEGACY)
         {
             if (args > static_args)
             {
-                static string[256];
-                const string_size = sizeof(string);
-
                 while (--args >= 3)
                 {
                     #emit LCTRL 5
@@ -1201,45 +1184,47 @@ stock FIXES_GameTextForAll(const text[], time, style, {Float, _}:...)
 
                 #emit PUSH.S text
                 #emit PUSH.C string_size
-                #emit PUSH.C string
+                #emit PUSH.C temp_string
                 #emit LOAD.S.pri 8
                 #emit ADD.C args_diff
                 #emit PUSH.pri
                 #emit SYSREQ.C format
                 #emit LCTRL 5
                 #emit SCTRL 4
-                
-                return BAD_GameTextForAll(string, time, style);
+
+                return ORIG_GameTextForAll(temp_string, time, style);
             }
             else
             {
-                return BAD_GameTextForAll(text, time, style);
+                return ORIG_GameTextForAll(text, time, style);
             }
         }
+    #else
+        #pragma unused temp_string
     #endif
-    
+
     if (gs_GameTextTimer[style][MAX_PLAYERS])
     {
         KillTimer(gs_GameTextTimer[style][MAX_PLAYERS]);
         gs_GameTextTimer[style][MAX_PLAYERS] = 0;
     }
-    
+
     if (gs_GameTextFadeInTimer[style][MAX_PLAYERS])
     {
         KillTimer(gs_GameTextFadeInTimer[style][MAX_PLAYERS]);
         gs_GameTextFadeInTimer[style][MAX_PLAYERS] = 0;
     }
-    
+
     if (gs_GameTextFadeOutTimer[style][MAX_PLAYERS])
     {
         KillTimer(gs_GameTextFadeOutTimer[style][MAX_PLAYERS]);
         gs_GameTextFadeOutTimer[style][MAX_PLAYERS] = 0;
     }
-    
+
     gs_GameTextIsFadingOut[style][MAX_PLAYERS] = false;
     gs_GameTextIsFadingIn[style][MAX_PLAYERS] = false;
-    
-    if (style != 14 && style != 9 && style != 10)
+
+    if (!(3 <= style <= 6) && !(9 <= style <= 14) && style != 17)
     {
         gs_GameTextOriginalColor[style][MAX_PLAYERS] = TextDrawGetColour(gs_GameTextStyle[style]);
         gs_GameTextOriginalBGColor[style][MAX_PLAYERS] = TextDrawGetBackgroundColour(gs_GameTextStyle[style]);
@@ -1271,7 +1256,7 @@ stock FIXES_GameTextForAll(const text[], time, style, {Float, _}:...)
         #emit SYSREQ.C format
         #emit LCTRL 5
         #emit SCTRL 4
-        
+
         TextDrawSetString(gs_GameTextStyle[style], string);
     }
     else
@@ -1285,7 +1270,7 @@ stock FIXES_GameTextForAll(const text[], time, style, {Float, _}:...)
         #endif
     }
 
-    if (style == 14 || style == 9 || style == 10)
+    if (3 <= style <= 6 || 9 <= style <= 14 || style == 17)
     {
         TextDrawShowForAll(gs_GameTextStyle[style]);
     }
@@ -1294,12 +1279,12 @@ stock FIXES_GameTextForAll(const text[], time, style, {Float, _}:...)
         gs_GameTextIsFadingIn[style][MAX_PLAYERS] = true;
         OnFadeInGameText(MAX_PLAYERS, style, 0, 0, 0);
     }
-    
+
     if (time > 0)
     {
         gs_GameTextTimer[style][MAX_PLAYERS] = SetTimerEx("OnHideGameText", time, false, "dd", MAX_PLAYERS, style);
     }
-    
+
     return true;
 }
 
@@ -1315,35 +1300,35 @@ forward OnFadeInGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, 
 public OnFadeInGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, boxColourAlpha)
 {
     new targetAlpha = (gs_GameTextOriginalColor[styleid][playerid] & 0xFF);
-    
+
     if (colourAlpha < targetAlpha)
     {
         colourAlpha += clamp(targetAlpha / FADE_ALPHA_STEP, 1, targetAlpha - colourAlpha);
     }
-    
+
     targetAlpha = (gs_GameTextOriginalBGColor[styleid][playerid] & 0xFF);
     if (backgroundColourAlpha < targetAlpha)
     {
         backgroundColourAlpha += clamp(targetAlpha / FADE_ALPHA_STEP, 1, targetAlpha - backgroundColourAlpha);
     }
-    
+
     targetAlpha = (gs_GameTextOriginalBoxColor[styleid][playerid] & 0xFF);
     if (boxColourAlpha < targetAlpha)
     {
         boxColourAlpha += clamp(targetAlpha / FADE_ALPHA_STEP, 1, targetAlpha - boxColourAlpha);
     }
 
-    if (colourAlpha < (gs_GameTextOriginalColor[styleid][playerid] & 0xFF) || 
-        backgroundColourAlpha < (gs_GameTextOriginalBGColor[styleid][playerid] & 0xFF) || 
+    if (colourAlpha < (gs_GameTextOriginalColor[styleid][playerid] & 0xFF) ||
+        backgroundColourAlpha < (gs_GameTextOriginalBGColor[styleid][playerid] & 0xFF) ||
         boxColourAlpha < (gs_GameTextOriginalBoxColor[styleid][playerid] & 0xFF))
     {
         if (playerid == MAX_PLAYERS)
         {
-            TextDrawColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalColor[styleid][MAX_PLAYERS] & ~0xFF) | colourAlpha); 
-            TextDrawBackgroundColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] & ~0xFF) | backgroundColourAlpha); 
-            if (styleid != 14 && styleid != 9 && styleid != 10)
+            TextDrawColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalColor[styleid][MAX_PLAYERS] & ~0xFF) | colourAlpha);
+            TextDrawBackgroundColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] & ~0xFF) | backgroundColourAlpha);
+            if (!(3 <= styleid <= 6) && !(9 <= styleid <= 14) && styleid != 17)
             {
-                TextDrawBoxColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] & ~0xFF) | boxColourAlpha);  
+                TextDrawBoxColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] & ~0xFF) | boxColourAlpha);
             }
             TextDrawShowForAll(gs_GameTextStyle[styleid]);
         }
@@ -1351,7 +1336,7 @@ public OnFadeInGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, b
         {
             PlayerTextDrawColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], (gs_GameTextOriginalColor[styleid][playerid] & ~0xFF) | colourAlpha);
             PlayerTextDrawBackgroundColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], (gs_GameTextOriginalBGColor[styleid][playerid] & ~0xFF) | backgroundColourAlpha);
-            if (styleid != 14 && styleid != 9 && styleid != 10)
+            if (!(3 <= styleid <= 6) && !(9 <= styleid <= 14) && styleid != 17)
             {
                 PlayerTextDrawBoxColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], (gs_GameTextOriginalBoxColor[styleid][playerid] & ~0xFF) | boxColourAlpha);
             }
@@ -1365,7 +1350,7 @@ public OnFadeInGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, b
         gs_GameTextIsFadingIn[styleid][playerid] = false;
         gs_GameTextFadeInTimer[styleid][playerid] = 0;
     }
-    return true;
+    return 1;
 }
 
 /*
@@ -1396,11 +1381,11 @@ public OnFadeOutGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, 
     {
         if (playerid == MAX_PLAYERS)
         {
-            TextDrawColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalColor[styleid][MAX_PLAYERS] & ~0xFF) | colourAlpha);  
-            TextDrawBackgroundColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] & ~0xFF) | backgroundColourAlpha); 
-            if (styleid != 14 && styleid != 9 && styleid != 10)
+            TextDrawColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalColor[styleid][MAX_PLAYERS] & ~0xFF) | colourAlpha);
+            TextDrawBackgroundColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] & ~0xFF) | backgroundColourAlpha);
+            if (!(3 <= styleid <= 6) && !(9 <= styleid <= 14) && styleid != 17)
             {
-                TextDrawBoxColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] & ~0xFF) | boxColourAlpha); 
+                TextDrawBoxColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] & ~0xFF) | boxColourAlpha);
             }
             TextDrawShowForAll(gs_GameTextStyle[styleid]);
         }
@@ -1408,7 +1393,7 @@ public OnFadeOutGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, 
         {
             PlayerTextDrawColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], (gs_GameTextOriginalColor[styleid][playerid] & ~0xFF) | colourAlpha);
             PlayerTextDrawBackgroundColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], (gs_GameTextOriginalBGColor[styleid][playerid] & ~0xFF) | backgroundColourAlpha);
-            if (styleid != 14 && styleid != 9 && styleid != 10)
+            if (!(3 <= styleid <= 6) && !(9 <= styleid <= 14) && styleid != 17)
             {
                 PlayerTextDrawBoxColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], (gs_GameTextOriginalBoxColor[styleid][playerid] & ~0xFF) | boxColourAlpha);
             }
@@ -1419,17 +1404,19 @@ public OnFadeOutGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, 
     }
     else
     {
-        new origColorAlpha = gs_GameTextOriginalColor[styleid][playerid] & 0xFF;
-        new origBGAlpha = gs_GameTextOriginalBGColor[styleid][playerid] & 0xFF;
-        new origBoxAlpha = gs_GameTextOriginalBoxColor[styleid][playerid] & 0xFF;
+        new
+            origColorAlpha = (gs_GameTextOriginalColor[styleid][playerid] & 0xFF),
+            origBGAlpha = (gs_GameTextOriginalBGColor[styleid][playerid] & 0xFF),
+            origBoxAlpha = (gs_GameTextOriginalBoxColor[styleid][playerid] & 0xFF)
+        ;
 
         if (playerid == MAX_PLAYERS)
         {
-            TextDrawColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalColor[styleid][MAX_PLAYERS] & ~0xFF) | origColorAlpha); 
-            TextDrawBackgroundColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] & ~0xFF) | origBGAlpha); 
-            if (styleid != 14 && styleid != 9 && styleid != 10)
+            TextDrawColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalColor[styleid][MAX_PLAYERS] & ~0xFF) | origColorAlpha);
+            TextDrawBackgroundColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] & ~0xFF) | origBGAlpha);
+            if (!(3 <= styleid <= 6) && !(9 <= styleid <= 14) && styleid != 17)
             {
-                TextDrawBoxColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] & ~0xFF) | origBoxAlpha); 
+                TextDrawBoxColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] & ~0xFF) | origBoxAlpha);
             }
             TextDrawHideForAll(gs_GameTextStyle[styleid]);
         }
@@ -1437,7 +1424,7 @@ public OnFadeOutGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, 
         {
             PlayerTextDrawColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], (gs_GameTextOriginalColor[styleid][playerid] & ~0xFF) | origColorAlpha);
             PlayerTextDrawBackgroundColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], (gs_GameTextOriginalBGColor[styleid][playerid] & ~0xFF) | origBGAlpha);
-            if (styleid != 14 && styleid != 9 && styleid != 10)
+            if (!(3 <= styleid <= 6) && !(9 <= styleid <= 14) && styleid != 17)
             {
                 PlayerTextDrawBoxColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], (gs_GameTextOriginalBoxColor[styleid][playerid] & ~0xFF) | origBoxAlpha);
             }
@@ -1447,7 +1434,7 @@ public OnFadeOutGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, 
         gs_GameTextIsFadingOut[styleid][playerid] = false;
         gs_GameTextFadeOutTimer[styleid][playerid] = 0;
     }
-    return true;
+    return 1;
 }
 
 //==========================================================================
@@ -1455,19 +1442,19 @@ public OnFadeOutGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, 
 //==========================================================================
 
 #define _ALS_GameTextForPlayer
-#define GameTextForPlayer FIXES_GameTextForPlayer
+#define GameTextForPlayer GTP_GameTextForPlayer
 
-#define _ALS_GameTextForAll  
-#define GameTextForAll FIXES_GameTextForAll
+#define _ALS_GameTextForAll
+#define GameTextForAll GTP_GameTextForAll
 
 public OnPlayerConnect(playerid)
 {
     GameTextEx(playerid);
-    
+
     #if defined GTP_OnPlayerConnect
         return GTP_OnPlayerConnect(playerid);
     #else
-        return true;
+        return 1;
     #endif
 }
 #if defined _ALS_OnPlayerConnect
@@ -1482,7 +1469,7 @@ public OnPlayerConnect(playerid)
 
 public OnPlayerDisconnect(playerid, reason)
 {
-    for (new style = GAMETEXT_STYLE_MIN; style <= GAMETEXT_STYLE_MAX; style++)
+    for (new style = MIN_GAMETEXT_STYLE; style <= MAX_GAMETEXT_STYLE; style++)
     {
         if (gs_GameTextFadeOutTimer[style][playerid])
         {
@@ -1497,13 +1484,13 @@ public OnPlayerDisconnect(playerid, reason)
         gs_GameTextIsFadingOut[style][playerid] = false;
         gs_GameTextIsFadingIn[style][playerid] = false;
     }
-    
+
     OnDestroyGameText(playerid);
-    
+
     #if defined GTP_OnPlayerDisconnect
         return GTP_OnPlayerDisconnect(playerid, reason);
     #else
-        return true;
+        return 1;
     #endif
 }
 #if defined _ALS_OnPlayerDisconnect
@@ -1519,11 +1506,11 @@ public OnPlayerDisconnect(playerid, reason)
 public OnGameModeInit()
 {
     GameTextEx(INVALID_PLAYER_ID);
-    
+
     #if defined GTP_OnGameModeInit
         return GTP_OnGameModeInit();
     #else
-        return true;
+        return 1;
     #endif
 }
 #if defined _ALS_OnGameModeInit
@@ -1539,11 +1526,11 @@ public OnGameModeInit()
 public OnGameModeExit()
 {
     OnDestroyGameText(INVALID_PLAYER_ID);
-    
+
     #if defined GTP_OnGameModeExit
         return GTP_OnGameModeExit();
     #else
-        return true;
+        return 1;
     #endif
 }
 #if defined _ALS_OnGameModeExit
@@ -1557,7 +1544,9 @@ public OnGameModeExit()
 #endif
 
 //! Developer's PRAGMA wore off!
-#if !defined _INC_open_mp
-    #pragma warning pop
+#if !defined _INC_open_mp && defined __PawnBuild
+    #if __PawnBuild > 4
+        #pragma warning pop
+    #endif
 #endif
 //! Compiler awakens! Its power is restored to its previous state!
