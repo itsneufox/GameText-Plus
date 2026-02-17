@@ -529,7 +529,7 @@ static stock GameTextEx(playerid)
 
         // Style 16 (Lower Notification Style)
         t = gs_GameTextStyle[16] = TextDrawCreate(28.0, 150.0, EMPTY_STRING);
-        TextDrawLetterSize(t, 0.416, 1.76);
+        TextDrawLetterSize(t, 0.42, 1.8);
         TextDrawAlignment(t, TEXT_DRAW_ALIGN:1);
         #if !defined _INC_open_mp
             TextDrawColour(t, SaveTextDrawColour(t, 0xFFFFFF96));
@@ -548,8 +548,8 @@ static stock GameTextEx(playerid)
         TextDrawTextSize(t, 212.0, 200.0);
 
         // Style 17 (Subtitles Style)
-        t = gs_GameTextStyle[17] = TextDrawCreate(380.0, 345.0, EMPTY_STRING);
-        TextDrawLetterSize(t, 0.45, 1.95);
+        t = gs_GameTextStyle[17] = TextDrawCreate(320.0, 368.1, EMPTY_STRING);
+        TextDrawLetterSize(t, 0.58, 2.38);
         TextDrawAlignment(t, TEXT_DRAW_ALIGN:2);
         #if !defined _INC_open_mp
             TextDrawColour(t, SaveTextDrawColour(t, 0xE1E1E1FF));
@@ -560,11 +560,12 @@ static stock GameTextEx(playerid)
             TextDrawBackgroundColour(t, 0x000000AA);
             TextDrawBoxColour(t, 0x00000000);
         #endif
-        TextDrawSetOutline(t, 1);
+        TextDrawSetShadow(t, 2);
+        TextDrawSetOutline(t, 0);
         TextDrawFont(t, TEXT_DRAW_FONT:1);
         TextDrawSetProportional(t, true);
         TextDrawUseBox(t, true);
-        TextDrawTextSize(t, 70.0, 448.0);
+        TextDrawTextSize(t, 40.0, 460.0);
     }
     else
     {
@@ -880,7 +881,7 @@ static stock GameTextEx(playerid)
 
         // Style 16 (Lower Notification Style)
         pt = gs_PlayerGameTextStyle[playerid][16] = CreatePlayerTextDraw(playerid, 28.0, 150.0, EMPTY_STRING);
-        PlayerTextDrawLetterSize(playerid, pt, 0.416, 1.76);
+        PlayerTextDrawLetterSize(playerid, pt, 0.42, 1.8);
         PlayerTextDrawAlignment(playerid, pt, TEXT_DRAW_ALIGN:1);
         #if !defined _INC_open_mp
             PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0xFFFFFF96));
@@ -899,8 +900,8 @@ static stock GameTextEx(playerid)
         PlayerTextDrawTextSize(playerid, pt, 212.0, 200.0);
 
         // Style 17 (Subtitles Style)
-        pt = gs_PlayerGameTextStyle[playerid][17] = CreatePlayerTextDraw(playerid, 380.0, 345.0, EMPTY_STRING);
-        PlayerTextDrawLetterSize(playerid, pt, 0.45, 1.95);
+        pt = gs_PlayerGameTextStyle[playerid][17] = CreatePlayerTextDraw(playerid, 320.0, 368.1, EMPTY_STRING);
+        PlayerTextDrawLetterSize(playerid, pt, 0.58, 2.38);
         PlayerTextDrawAlignment(playerid, pt, TEXT_DRAW_ALIGN:2);
         #if !defined _INC_open_mp
             PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, 0xE1E1E1FF));
@@ -911,11 +912,12 @@ static stock GameTextEx(playerid)
             PlayerTextDrawBackgroundColour(playerid, pt, 0x000000AA);
             PlayerTextDrawBoxColour(playerid, pt, 0x00000000);
         #endif
-        PlayerTextDrawSetOutline(playerid, pt, 1);
+        PlayerTextDrawSetShadow(playerid, pt, 2);
+        PlayerTextDrawSetOutline(playerid, pt, 0);
         PlayerTextDrawFont(playerid, pt, TEXT_DRAW_FONT:1);
         PlayerTextDrawSetProportional(playerid, pt, true);
         PlayerTextDrawUseBox(playerid, pt, true);
-        PlayerTextDrawTextSize(playerid, pt, 70.0, 448.0);
+        PlayerTextDrawTextSize(playerid, pt, 40.0, 460.0);
     }
     return true;
 }
