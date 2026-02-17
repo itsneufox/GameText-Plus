@@ -109,12 +109,12 @@ static
 #if defined _ALS_GameTextForPlayer
     #error _ALS_GameTextForPlayer defined
 #endif
-native BAD_GameTextForPlayer(playerid, const string[], time, style) = GameTextForPlayer;
+native ORIG_GameTextForPlayer(playerid, const string[], time, style) = GameTextForPlayer;
 
 #if defined _ALS_GameTextForAll
     #error _ALS_GameTextForAll defined
 #endif
-native BAD_GameTextForAll(const string[], time, style) = GameTextForAll;
+native ORIG_GameTextForAll(const string[], time, style) = GameTextForAll;
 
 //==========================================================================
 //                       TEXTDRAW COLOR STORAGE
@@ -1043,11 +1043,11 @@ stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
                 #emit LCTRL 5
                 #emit SCTRL 4
 
-                return BAD_GameTextForPlayer(playerid, string, time, style);
+                return ORIG_GameTextForPlayer(playerid, string, time, style);
             }
             else
             {
-                return BAD_GameTextForPlayer(playerid, text, time, style);
+                return ORIG_GameTextForPlayer(playerid, text, time, style);
             }
         }
     #endif
@@ -1188,11 +1188,11 @@ stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
                 #emit LCTRL 5
                 #emit SCTRL 4
 
-                return BAD_GameTextForAll(string, time, style);
+                return ORIG_GameTextForAll(string, time, style);
             }
             else
             {
-                return BAD_GameTextForAll(text, time, style);
+                return ORIG_GameTextForAll(text, time, style);
             }
         }
     #endif
