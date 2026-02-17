@@ -78,28 +78,28 @@
 //==========================================================================
 
 #if defined OVERRIDE_NATIVE_GAMETEXT
-    #define GAMETEXT_STYLE_MIN      0
+    #define MIN_GAMETEXT_STYLE      0
 #else
-    #define GAMETEXT_STYLE_MIN      7
+    #define MIN_GAMETEXT_STYLE      7
 #endif
 
 #define     MAX_GAMETEXT_LENGTH     256
 #define     GAMETEXT_LEGACY         6
-#define     GAMETEXT_STYLE_MAX      17
+#define     MAX_GAMETEXT_STYLE      17
 #define     FADE_INTERVAL           50
 #define     FADE_ALPHA_STEP         0x12
 
 static
-    Text:gs_GameTextStyle[GAMETEXT_STYLE_MAX + 1],
-    PlayerText:gs_PlayerGameTextStyle[MAX_PLAYERS][GAMETEXT_STYLE_MAX + 1],
-    gs_GameTextTimer[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1],
-    gs_GameTextFadeOutTimer[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1],
-    gs_GameTextFadeInTimer[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1],
-    gs_GameTextOriginalColor[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1],
-    gs_GameTextOriginalBGColor[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1],
-    gs_GameTextOriginalBoxColor[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1],
-    bool:gs_GameTextIsFadingOut[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1],
-    bool:gs_GameTextIsFadingIn[GAMETEXT_STYLE_MAX + 1][MAX_PLAYERS + 1]
+    Text:gs_GameTextStyle[MAX_GAMETEXT_STYLE + 1],
+    PlayerText:gs_PlayerGameTextStyle[MAX_PLAYERS][MAX_GAMETEXT_STYLE + 1],
+    gs_GameTextTimer[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1],
+    gs_GameTextFadeOutTimer[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1],
+    gs_GameTextFadeInTimer[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1],
+    gs_GameTextOriginalColor[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1],
+    gs_GameTextOriginalBGColor[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1],
+    gs_GameTextOriginalBoxColor[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1],
+    bool:gs_GameTextIsFadingOut[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1],
+    bool:gs_GameTextIsFadingIn[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1]
 ;
 
 //==========================================================================
@@ -975,14 +975,14 @@ static stock OnDestroyGameText(playerid)
 {
     if (playerid == INVALID_PLAYER_ID)
     {
-        for (new style = GAMETEXT_STYLE_MIN; style <= GAMETEXT_STYLE_MAX; style++)
+        for (new style = MIN_GAMETEXT_STYLE; style <= MAX_GAMETEXT_STYLE; style++)
         {
             TextDrawDestroy(gs_GameTextStyle[style]);
         }
     }
     else
     {
-        for (new style = GAMETEXT_STYLE_MIN; style <= GAMETEXT_STYLE_MAX; style++)
+        for (new style = MIN_GAMETEXT_STYLE; style <= MAX_GAMETEXT_STYLE; style++)
         {
             PlayerTextDrawDestroy(playerid, gs_PlayerGameTextStyle[playerid][style]);
         }
@@ -1002,10 +1002,10 @@ stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
     if (!IsPlayerConnected(playerid)) return false;
 
     #if defined OVERRIDE_NATIVE_GAMETEXT
-        if (!(GAMETEXT_STYLE_MIN <= style <= GAMETEXT_STYLE_MAX)) return false;
+        if (!(MIN_GAMETEXT_STYLE <= style <= MAX_GAMETEXT_STYLE)) return false;
     #else
         // Allow native styles 0-6 to pass through to native functions
-        if (!(0 <= style <= GAMETEXT_STYLE_MAX)) return false;
+        if (!(0 <= style <= MAX_GAMETEXT_STYLE)) return false;
     #endif
 
     const static_args = 4;
@@ -1147,10 +1147,10 @@ stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
 stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
 {
     #if defined OVERRIDE_NATIVE_GAMETEXT
-        if (!(GAMETEXT_STYLE_MIN <= style <= GAMETEXT_STYLE_MAX)) return false;
+        if (!(MIN_GAMETEXT_STYLE <= style <= MAX_GAMETEXT_STYLE)) return false;
     #else
         // Allow native styles 0-6 to pass through to native functions
-        if (!(0 <= style <= GAMETEXT_STYLE_MAX)) return false;
+        if (!(0 <= style <= MAX_GAMETEXT_STYLE)) return false;
     #endif
 
     const static_args = 3;
@@ -1463,7 +1463,7 @@ public OnPlayerConnect(playerid)
 
 public OnPlayerDisconnect(playerid, reason)
 {
-    for (new style = GAMETEXT_STYLE_MIN; style <= GAMETEXT_STYLE_MAX; style++)
+    for (new style = MIN_GAMETEXT_STYLE; style <= MAX_GAMETEXT_STYLE; style++)
     {
         if (gs_GameTextFadeOutTimer[style][playerid])
         {
