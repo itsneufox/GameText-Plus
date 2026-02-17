@@ -63,7 +63,10 @@
     #if !defined TextDrawColour
         #define TextDrawColour TextDrawColor
     #endif
-
+#else // defined _INC_open_mp
+    #if __namemax > 31
+        #define PlayerTextDrawGetBackgroundCol PlayerTextDrawGetBackgroundColour
+    #endif
 #endif
 
 //! WILD COMPILER appeared! Compiler used WARNINGS about const correctness!
