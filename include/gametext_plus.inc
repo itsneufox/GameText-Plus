@@ -928,7 +928,7 @@ static stock GameTextEx(playerid)
 forward OnHideGameText(playerid, styleid);
 public OnHideGameText(playerid, styleid)
 {
-    if (9 <= styleid <= 10 || styleid == 14)
+    if (3 <= styleid <= 6 || 9 <= styleid <= 14 || styleid == 17)
     {
         if (playerid == MAX_PLAYERS)
         {
@@ -1075,7 +1075,7 @@ stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
     gs_GameTextIsFadingOut[style][playerid] = false;
     gs_GameTextIsFadingIn[style][playerid] = false;
 
-    if (!(9 <= style <= 10) && style != 14)
+    if (!(3 <= style <= 6) && !(9 <= style <= 14) && style != 17)
     {
         gs_GameTextOriginalColor[style][playerid] = PlayerTextDrawGetColour(playerid, gs_PlayerGameTextStyle[playerid][style]);
         gs_GameTextOriginalBGColor[style][playerid] = PlayerTextDrawGetBackgroundCol(playerid, gs_PlayerGameTextStyle[playerid][style]);
@@ -1121,7 +1121,7 @@ stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
         #endif
     }
 
-    if (9 <= style <= 10 || style == 14)
+    if (3 <= style <= 6 || 9 <= style <= 14 || style == 17)
     {
         PlayerTextDrawShow(playerid, gs_PlayerGameTextStyle[playerid][style]);
     }
@@ -1220,7 +1220,7 @@ stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
     gs_GameTextIsFadingOut[style][MAX_PLAYERS] = false;
     gs_GameTextIsFadingIn[style][MAX_PLAYERS] = false;
 
-    if (!(9 <= style <= 10) && style != 14)
+    if (!(3 <= style <= 6) && !(9 <= style <= 14) && style != 17)
     {
         gs_GameTextOriginalColor[style][MAX_PLAYERS] = TextDrawGetColour(gs_GameTextStyle[style]);
         gs_GameTextOriginalBGColor[style][MAX_PLAYERS] = TextDrawGetBackgroundColour(gs_GameTextStyle[style]);
@@ -1266,7 +1266,7 @@ stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
         #endif
     }
 
-    if (9 <= style <= 10 || style == 14)
+    if (3 <= style <= 6 || 9 <= style <= 14 || style == 17)
     {
         TextDrawShowForAll(gs_GameTextStyle[style]);
     }
@@ -1322,7 +1322,7 @@ public OnFadeInGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, b
         {
             TextDrawColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalColor[styleid][MAX_PLAYERS] & ~0xFF) | colourAlpha);
             TextDrawBackgroundColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] & ~0xFF) | backgroundColourAlpha);
-            if (!(9 <= styleid <= 10) && styleid != 14)
+            if (!(3 <= styleid <= 6) && !(9 <= styleid <= 14) && styleid != 17)
             {
                 TextDrawBoxColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] & ~0xFF) | boxColourAlpha);
             }
@@ -1332,7 +1332,7 @@ public OnFadeInGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, b
         {
             PlayerTextDrawColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], (gs_GameTextOriginalColor[styleid][playerid] & ~0xFF) | colourAlpha);
             PlayerTextDrawBackgroundColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], (gs_GameTextOriginalBGColor[styleid][playerid] & ~0xFF) | backgroundColourAlpha);
-            if (!(9 <= styleid <= 10) && styleid != 14)
+            if (!(3 <= styleid <= 6) && !(9 <= styleid <= 14) && styleid != 17)
             {
                 PlayerTextDrawBoxColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], (gs_GameTextOriginalBoxColor[styleid][playerid] & ~0xFF) | boxColourAlpha);
             }
@@ -1379,7 +1379,7 @@ public OnFadeOutGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, 
         {
             TextDrawColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalColor[styleid][MAX_PLAYERS] & ~0xFF) | colourAlpha);
             TextDrawBackgroundColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] & ~0xFF) | backgroundColourAlpha);
-            if (!(9 <= styleid <= 10) && styleid != 14)
+            if (!(3 <= styleid <= 6) && !(9 <= styleid <= 14) && styleid != 17)
             {
                 TextDrawBoxColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] & ~0xFF) | boxColourAlpha);
             }
@@ -1389,7 +1389,7 @@ public OnFadeOutGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, 
         {
             PlayerTextDrawColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], (gs_GameTextOriginalColor[styleid][playerid] & ~0xFF) | colourAlpha);
             PlayerTextDrawBackgroundColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], (gs_GameTextOriginalBGColor[styleid][playerid] & ~0xFF) | backgroundColourAlpha);
-            if (!(9 <= styleid <= 10) && styleid != 14)
+            if (!(3 <= styleid <= 6) && !(9 <= styleid <= 14) && styleid != 17)
             {
                 PlayerTextDrawBoxColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], (gs_GameTextOriginalBoxColor[styleid][playerid] & ~0xFF) | boxColourAlpha);
             }
@@ -1410,7 +1410,7 @@ public OnFadeOutGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, 
         {
             TextDrawColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalColor[styleid][MAX_PLAYERS] & ~0xFF) | origColorAlpha);
             TextDrawBackgroundColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] & ~0xFF) | origBGAlpha);
-            if (!(9 <= styleid <= 10) && styleid != 14)
+            if (!(3 <= styleid <= 6) && !(9 <= styleid <= 14) && styleid != 17)
             {
                 TextDrawBoxColour(gs_GameTextStyle[styleid], (gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] & ~0xFF) | origBoxAlpha);
             }
@@ -1420,7 +1420,7 @@ public OnFadeOutGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, 
         {
             PlayerTextDrawColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], (gs_GameTextOriginalColor[styleid][playerid] & ~0xFF) | origColorAlpha);
             PlayerTextDrawBackgroundColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], (gs_GameTextOriginalBGColor[styleid][playerid] & ~0xFF) | origBGAlpha);
-            if (!(9 <= styleid <= 10) && styleid != 14)
+            if (!(3 <= styleid <= 6) && !(9 <= styleid <= 14) && styleid != 17)
             {
                 PlayerTextDrawBoxColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], (gs_GameTextOriginalBoxColor[styleid][playerid] & ~0xFF) | origBoxAlpha);
             }
