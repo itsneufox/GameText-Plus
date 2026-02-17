@@ -1013,7 +1013,9 @@ stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
     const static_args = 4;
     const args_diff = (3 - static_args) * 4; // format's static args end at index 3, current function's end at static_arg_count. Also * 4 because cells are 4 bytes
 
-    static args;
+    static args, temp_string[256];
+    const string_size = sizeof(temp_string);
+
     args = numargs();
 
     #if !defined OVERRIDE_NATIVE_GAMETEXT
@@ -1021,9 +1023,6 @@ stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
         {
             if (args > static_args)
             {
-                static string[256];
-                const string_size = sizeof(string);
-
                 while (--args >= 4)
                 {
                     #emit LCTRL 5
@@ -1037,7 +1036,7 @@ stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
 
                 #emit PUSH.S text
                 #emit PUSH.C string_size
-                #emit PUSH.C string
+                #emit PUSH.C temp_string
                 #emit LOAD.S.pri 8
                 #emit ADD.C args_diff
                 #emit PUSH.pri
@@ -1045,13 +1044,15 @@ stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
                 #emit LCTRL 5
                 #emit SCTRL 4
 
-                return ORIG_GameTextForPlayer(playerid, string, time, style);
+                return ORIG_GameTextForPlayer(playerid, temp_string, time, style);
             }
             else
             {
                 return ORIG_GameTextForPlayer(playerid, text, time, style);
             }
         }
+    #else
+        #pragma unused temp_string
     #endif
 
     if (gs_GameTextTimer[style][playerid])
@@ -1158,7 +1159,9 @@ stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
     const static_args = 3;
     const args_diff = (3 - static_args) * 4; // format's static args end at index 3, current function's end at static_arg_count. Also * 4 because cells are 4 bytes
 
-    static args;
+    static args, temp_string[256];
+    const string_size = sizeof(temp_string);
+
     args = numargs();
 
     #if !defined OVERRIDE_NATIVE_GAMETEXT
@@ -1166,9 +1169,6 @@ stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
         {
             if (args > static_args)
             {
-                static string[256];
-                const string_size = sizeof(string);
-
                 while (--args >= 3)
                 {
                     #emit LCTRL 5
@@ -1182,7 +1182,7 @@ stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
 
                 #emit PUSH.S text
                 #emit PUSH.C string_size
-                #emit PUSH.C string
+                #emit PUSH.C temp_string
                 #emit LOAD.S.pri 8
                 #emit ADD.C args_diff
                 #emit PUSH.pri
@@ -1190,13 +1190,15 @@ stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
                 #emit LCTRL 5
                 #emit SCTRL 4
 
-                return ORIG_GameTextForAll(string, time, style);
+                return ORIG_GameTextForAll(temp_string, time, style);
             }
             else
             {
                 return ORIG_GameTextForAll(text, time, style);
             }
         }
+    #else
+        #pragma unused temp_string
     #endif
 
     if (gs_GameTextTimer[style][MAX_PLAYERS])
