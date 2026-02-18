@@ -88,9 +88,10 @@ The package includes a comprehensive testing script:
 
 - @AmyrAhmady - For the idea and the opportunity and also the updated Assembly code
 - @Sreyas-Sreelal - For the Assembly code
-- @edgyaf - for the textdraw's fader functionality
-- @imshooter - for the creation of Style 16
-- @Vince0789 - for the creation of Style 17
+- @edgyaf - For the textdraw's fader functionality
+- @imshooter - For the creation of Style 16
+- @Vince0789 - For the creation of Style 17
+- @NexiusTailer - For all the improvements on the include itself
 - @Y_Less - Original fixes.inc
 
 ## License
