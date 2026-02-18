@@ -28,7 +28,7 @@
 #define _INC_gametext_plus
 
 #if defined _INC_SAMP_Community_fixes
-    #error "Incompatibility detected: 'fixes.inc' is deprecated in open.mp. Please remove it from your project. All GameText functionalities are now provided by GameText+ include."
+    #error "Incompatibility detected: 'fixes.inc'. Please remove it from your project. All GameText functionalities are now provided by GameText+ include."
 #endif
 
 #if !defined _INC_open_mp
