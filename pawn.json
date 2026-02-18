@@ -1,0 +1,10 @@
+{
+	"user": "itsneufox",
+	"repo": "GameText-Plus",
+	"entry": "testing/omp/omp_test.pwn",
+	"output": "testing/omp/omp_test.amx",
+	"dependencies": [
+		"openmultiplayer/omp-stdlib"
+	],
+	"include_path": "include"
+}
