@@ -158,7 +158,7 @@ public ContinueStyleTest(playerid)
     if (!gPlayerShowingStyles[playerid]) return false;
 
     gCurrentStyle[playerid]++;
-    if (gCurrentStyle[playerid] > GAMETEXT_STYLE_MAX)
+    if (gCurrentStyle[playerid] > MAX_GAMETEXT_STYLE)
     {
         GameTextForPlayer(playerid, "~g~Test Complete!", 3000, 6);
         SendClientMessage(playerid, -1, "You've seen all available styles!");
@@ -183,7 +183,7 @@ ShowCurrentStyle(playerid)
 
     new string[128];
     format(string, sizeof(string), "Showing style %d of %d",
-        gCurrentStyle[playerid], GAMETEXT_STYLE_MAX);
+        gCurrentStyle[playerid], MAX_GAMETEXT_STYLE);
     SendClientMessage(playerid, -1, string);
 
     if (gTestType[playerid] == 0)
