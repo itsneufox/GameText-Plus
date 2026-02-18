@@ -91,6 +91,7 @@
 #define     MAX_GAMETEXT_LENGTH     256
 #define     GAMETEXT_LEGACY         6
 #define     MAX_GAMETEXT_STYLE      17
+
 #define     FADE_INTERVAL           50
 #define     FADE_ALPHA_STEP         0x12
 
@@ -1127,7 +1128,7 @@ stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
         #endif
     }
 
-    if (3 <= style <= 6 || 9 <= style <= 14 || style == 17)
+    if (style == 1 || 3 <= style <= 6 || 9 <= style <= 17)
     {
         PlayerTextDrawShow(playerid, gs_PlayerGameTextStyle[playerid][style]);
     }
@@ -1273,7 +1274,7 @@ stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
         #endif
     }
 
-    if (3 <= style <= 6 || 9 <= style <= 14 || style == 17)
+    if (style == 1 || 3 <= style <= 6 || 9 <= style <= 17)
     {
         TextDrawShowForAll(gs_GameTextStyle[style]);
     }
