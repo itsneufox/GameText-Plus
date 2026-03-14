@@ -377,9 +377,9 @@ public OnHideGameText(playerid, styleid)
         }
         else
         {
-            PlayerTextDrawColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], gs_GameTextOriginalColor[styleid][playerid]);
-            PlayerTextDrawBackgroundColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], gs_GameTextOriginalBGColor[styleid][playerid]);
-            PlayerTextDrawBoxColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], gs_GameTextOriginalBoxColor[styleid][playerid]);
+            gs_GameTextOriginalColor[styleid][playerid] = PlayerTextDrawGetColour(playerid, gs_PlayerGameTextStyle[playerid][styleid]);
+            gs_GameTextOriginalBGColor[styleid][playerid] = PlayerTextDrawGetBackgroundCol(playerid, gs_PlayerGameTextStyle[playerid][styleid]);
+            gs_GameTextOriginalBoxColor[styleid][playerid] = PlayerTextDrawGetBoxColour(playerid, gs_PlayerGameTextStyle[playerid][styleid]);
         }
         gs_GameTextIsFadingOut[styleid][playerid] = true;
     }
@@ -497,9 +497,6 @@ stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
         gs_GameTextFadeOutTimer[style][playerid] = 0;
     }
 
-    gs_GameTextIsFadingOut[style][playerid] = false;
-    gs_GameTextIsFadingIn[style][playerid] = false;
-
     if (args > static_args)
     {
         static string[MAX_GAMETEXT_LENGTH];
@@ -537,6 +534,16 @@ stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
 
     if (!gs_StyleList[style][e_fadein])
     {
+        if (gs_StyleList[style][e_fadeout] && gs_GameTextIsFadingOut[style][playerid])
+        {
+            PlayerTextDrawColour(playerid, gs_PlayerGameTextStyle[playerid][style], gs_GameTextOriginalColor[style][playerid]);
+            PlayerTextDrawBackgroundColour(playerid, gs_PlayerGameTextStyle[playerid][style], gs_GameTextOriginalBGColor[style][playerid]);
+            PlayerTextDrawBoxColour(playerid, gs_PlayerGameTextStyle[playerid][style], gs_GameTextOriginalBoxColor[style][playerid]);
+        }
+
+        gs_GameTextIsFadingOut[style][playerid] = false;
+        gs_GameTextIsFadingIn[style][playerid] = false;
+
         PlayerTextDrawShow(playerid, gs_PlayerGameTextStyle[playerid][style]);
     }
     else
@@ -545,7 +552,9 @@ stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
         gs_GameTextOriginalBGColor[style][playerid] = PlayerTextDrawGetBackgroundCol(playerid, gs_PlayerGameTextStyle[playerid][style]);
         gs_GameTextOriginalBoxColor[style][playerid] = PlayerTextDrawGetBoxColour(playerid, gs_PlayerGameTextStyle[playerid][style]);
 
+        gs_GameTextIsFadingOut[style][playerid] = false;
         gs_GameTextIsFadingIn[style][playerid] = true;
+
         OnFadeInGameText(playerid, style, 0, 0, 0);
     }
 
@@ -635,9 +644,6 @@ stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
         gs_GameTextFadeOutTimer[style][MAX_PLAYERS] = 0;
     }
 
-    gs_GameTextIsFadingOut[style][MAX_PLAYERS] = false;
-    gs_GameTextIsFadingIn[style][MAX_PLAYERS] = false;
-
     if (args > static_args)
     {
         static string[MAX_GAMETEXT_LENGTH];
@@ -675,6 +681,16 @@ stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
 
     if (!gs_StyleList[style][e_fadein])
     {
+        if (gs_StyleList[style][e_fadeout] && gs_GameTextIsFadingOut[style][MAX_PLAYERS])
+        {
+            TextDrawColour(gs_GameTextStyle[style], gs_GameTextOriginalColor[style][MAX_PLAYERS]);
+            TextDrawBackgroundColour(gs_GameTextStyle[style], gs_GameTextOriginalBGColor[style][MAX_PLAYERS]);
+            TextDrawBoxColour(gs_GameTextStyle[style], gs_GameTextOriginalBoxColor[style][MAX_PLAYERS]);
+        }
+
+        gs_GameTextIsFadingOut[style][MAX_PLAYERS] = false;
+        gs_GameTextIsFadingIn[style][MAX_PLAYERS] = false;
+
         TextDrawShowForAll(gs_GameTextStyle[style]);
     }
     else
@@ -683,7 +699,9 @@ stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
         gs_GameTextOriginalBGColor[style][MAX_PLAYERS] = TextDrawGetBackgroundColour(gs_GameTextStyle[style]);
         gs_GameTextOriginalBoxColor[style][MAX_PLAYERS] = TextDrawGetBoxColour(gs_GameTextStyle[style]);
 
+        gs_GameTextIsFadingOut[style][MAX_PLAYERS] = false;
         gs_GameTextIsFadingIn[style][MAX_PLAYERS] = true;
+
         OnFadeInGameText(MAX_PLAYERS, style, 0, 0, 0);
     }
 
