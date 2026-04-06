@@ -97,6 +97,11 @@
 #define     FADE_INTERVAL           50
 #define     FADE_ALPHA_STEP         0x12
 
+#define     GTP_LEGACY_BG_ALPHA     0xAA
+#define     GTP_FIXED_BG_ALPHA      0xFF
+#define     GTP_LEGACY_BOX_ALPHA    0x80
+#define     GTP_FIXED_BOX_ALPHA     0xDD
+
 //==========================================================================
 //                              DATA STRUCTURES
 //==========================================================================
@@ -177,7 +182,8 @@ static
     gs_GameTextOriginalBGColor[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1],
     gs_GameTextOriginalBoxColor[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1],
     bool:gs_GameTextIsFadingOut[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1],
-    bool:gs_GameTextIsFadingIn[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1]
+    bool:gs_GameTextIsFadingIn[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1],
+    bool:gs_GameTextNeedsAlphaFix[MAX_PLAYERS]
 ;
 
 //==========================================================================
@@ -282,6 +288,61 @@ native ORIG_GameTextForAll(const string[], time, style) = GameTextForAll;
 //==========================================================================
 //                              CORE FUNCTIONS
 //==========================================================================
+
+/*
+ * Converts known legacy alpha values to newer client equivalents
+ * @param alpha - Alpha channel value (0-255)
+ */
+static stock GTP_FixLegacyAlphaValue(alpha)
+{
+    switch (alpha)
+    {
+        case GTP_LEGACY_BG_ALPHA: return GTP_FIXED_BG_ALPHA;
+        case GTP_LEGACY_BOX_ALPHA: return GTP_FIXED_BOX_ALPHA;
+    }
+    return alpha;
+}
+
+/*
+ * Updates only the alpha channel in a color if it matches a legacy value
+ * @param colour - RGBA color value
+ */
+static stock GTP_FixLegacyAlphaColour(colour)
+{
+    return (colour & ~0xFF) | GTP_FixLegacyAlphaValue(colour & 0xFF);
+}
+
+/*
+ * Applies alpha compatibility fix for player textdraws
+ * @param playerid - Target player
+ * @param text - PlayerTextDraw handle
+ */
+static stock GTP_ApplyPlayerAlphaFix(playerid, PlayerText:text)
+{
+    if (!gs_GameTextNeedsAlphaFix[playerid]) return false;
+
+    new colour = PlayerTextDrawGetBackgroundCol(playerid, text);
+    new fixed = GTP_FixLegacyAlphaColour(colour);
+    if (fixed != colour)
+    {
+        #if !defined _INC_open_mp
+            SavePlayerTextDrawBackgroundCol(playerid, text, fixed);
+        #endif
+        PlayerTextDrawBackgroundColour(playerid, text, fixed);
+    }
+
+    colour = PlayerTextDrawGetBoxColour(playerid, text);
+    fixed = GTP_FixLegacyAlphaColour(colour);
+    if (fixed != colour)
+    {
+        #if !defined _INC_open_mp
+            SavePlayerTextDrawBoxColour(playerid, text, fixed);
+        #endif
+        PlayerTextDrawBoxColour(playerid, text, fixed);
+    }
+
+    return true;
+}
 
 /*
  * Creates TextDraw styles either globally or for a specific player
@@ -497,6 +558,8 @@ stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
         gs_GameTextFadeOutTimer[style][playerid] = 0;
     }
 
+    GTP_ApplyPlayerAlphaFix(playerid, gs_PlayerGameTextStyle[playerid][style]);
+
     if (args > static_args)
     {
         static string[MAX_GAMETEXT_LENGTH];
@@ -642,6 +705,58 @@ stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
     {
         KillTimer(gs_GameTextFadeOutTimer[style][MAX_PLAYERS]);
         gs_GameTextFadeOutTimer[style][MAX_PLAYERS] = 0;
+    }
+
+    for (new playerid; playerid < MAX_PLAYERS; playerid++)
+    {
+        if (!IsPlayerConnected(playerid) || !gs_GameTextNeedsAlphaFix[playerid]) continue;
+
+        TextDrawHideForAll(gs_GameTextStyle[style]);
+
+        if (args > static_args)
+        {
+            static string[256];
+            const string_size = sizeof(string);
+
+            while (--args >= 3)
+            {
+                #emit LCTRL 5
+                #emit LOAD.alt args
+                #emit SHL.C.alt 2
+                #emit ADD.C 12
+                #emit ADD
+                #emit LOAD.I
+                #emit PUSH.pri
+            }
+
+            #emit PUSH.S text
+            #emit PUSH.C string_size
+            #emit PUSH.C string
+            #emit LOAD.S.pri 8
+            #emit ADD.C args_diff
+            #emit PUSH.pri
+            #emit SYSREQ.C format
+            #emit LCTRL 5
+            #emit SCTRL 4
+
+            for (new i; i < MAX_PLAYERS; i++)
+            {
+                if (!IsPlayerConnected(i)) continue;
+                GTP_GameTextForPlayer(i, string, time, style);
+            }
+        }
+        else
+        {
+            static string[MAX_GAMETEXT_LENGTH];
+            format(string, sizeof(string), "%s", text);
+
+            for (new i; i < MAX_PLAYERS; i++)
+            {
+                if (!IsPlayerConnected(i)) continue;
+                GTP_GameTextForPlayer(i, string, time, style);
+            }
+        }
+        return true;
     }
 
     if (args > static_args)
@@ -876,6 +991,16 @@ public OnPlayerConnect(playerid)
 {
     GameTextEx(playerid);
 
+    new version[24];
+    gs_GameTextNeedsAlphaFix[playerid] = false;
+    if (GetPlayerVersion(playerid, version, sizeof(version)))
+    {
+        gs_GameTextNeedsAlphaFix[playerid] =
+            strcmp(version, "0.3.7") != 0 &&
+            strcmp(version, "0.3.7-R2") != 0
+        ;
+    }
+
     #if defined GTP_OnPlayerConnect
         return GTP_OnPlayerConnect(playerid);
     #else
@@ -894,6 +1019,8 @@ public OnPlayerConnect(playerid)
 
 public OnPlayerDisconnect(playerid, reason)
 {
+    gs_GameTextNeedsAlphaFix[playerid] = false;
+
     for (new style = MIN_GAMETEXT_STYLE; style <= MAX_GAMETEXT_STYLE; style++)
     {
         if (gs_GameTextFadeOutTimer[style][playerid])
