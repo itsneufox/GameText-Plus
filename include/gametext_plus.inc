@@ -1149,31 +1149,46 @@ public OnHideGameText(playerid, styleid)
         return 1;
     }
 
-    if (!gs_GameTextIsFadingOut[styleid][playerid])
-    {
+    #if defined GTP_DISABLE_FADE
         if (playerid == MAX_PLAYERS)
         {
-            gs_GameTextOriginalColor[styleid][MAX_PLAYERS] = TextDrawGetColour(gs_GameTextStyle[styleid]);
-            gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] = TextDrawGetBackgroundColour(gs_GameTextStyle[styleid]);
-            gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] = TextDrawGetBoxColour(gs_GameTextStyle[styleid]);
+            TextDrawHideForAll(gs_GameTextStyle[styleid]);
+            gs_GameTextTimer[styleid][MAX_PLAYERS] = 0;
         }
         else
         {
-            PlayerTextDrawColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], gs_GameTextOriginalColor[styleid][playerid]);
-            PlayerTextDrawBackgroundColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], gs_GameTextOriginalBGColor[styleid][playerid]);
-            PlayerTextDrawBoxColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], gs_GameTextOriginalBoxColor[styleid][playerid]);
+            PlayerTextDrawHide(playerid, gs_PlayerGameTextStyle[playerid][styleid]);
+            gs_GameTextTimer[styleid][playerid] = 0;
+            GTP_DestroyPlayerGameTextStyle(playerid, styleid);
         }
-        gs_GameTextIsFadingOut[styleid][playerid] = true;
-    }
+        return 1;
+    #else
+        if (!gs_GameTextIsFadingOut[styleid][playerid])
+        {
+            if (playerid == MAX_PLAYERS)
+            {
+                gs_GameTextOriginalColor[styleid][MAX_PLAYERS] = TextDrawGetColour(gs_GameTextStyle[styleid]);
+                gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] = TextDrawGetBackgroundColour(gs_GameTextStyle[styleid]);
+                gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] = TextDrawGetBoxColour(gs_GameTextStyle[styleid]);
+            }
+            else
+            {
+                PlayerTextDrawColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], gs_GameTextOriginalColor[styleid][playerid]);
+                PlayerTextDrawBackgroundColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], gs_GameTextOriginalBGColor[styleid][playerid]);
+                PlayerTextDrawBoxColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], gs_GameTextOriginalBoxColor[styleid][playerid]);
+            }
+            gs_GameTextIsFadingOut[styleid][playerid] = true;
+        }
 
-    OnFadeOutGameText(playerid, styleid,
-        gs_GameTextOriginalColor[styleid][playerid] & 0xFF,
-        gs_GameTextOriginalBGColor[styleid][playerid] & 0xFF,
-        gs_GameTextOriginalBoxColor[styleid][playerid] & 0xFF
-    );
+        OnFadeOutGameText(playerid, styleid,
+            gs_GameTextOriginalColor[styleid][playerid] & 0xFF,
+            gs_GameTextOriginalBGColor[styleid][playerid] & 0xFF,
+            gs_GameTextOriginalBoxColor[styleid][playerid] & 0xFF
+        );
 
-    gs_GameTextTimer[styleid][playerid] = 0;
-    return 1;
+        gs_GameTextTimer[styleid][playerid] = 0;
+        return 1;
+    #endif
 }
 
 /*
@@ -1323,8 +1338,12 @@ stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
     }
     else
     {
-        gs_GameTextIsFadingIn[style][playerid] = true;
-        OnFadeInGameText(playerid, style, 0, 0, 0);
+        #if defined GTP_DISABLE_FADE
+            PlayerTextDrawShow(playerid, gs_PlayerGameTextStyle[playerid][style]);
+        #else
+            gs_GameTextIsFadingIn[style][playerid] = true;
+            OnFadeInGameText(playerid, style, 0, 0, 0);
+        #endif
     }
 
     if (time > 0)
@@ -1529,8 +1548,12 @@ stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
     }
     else
     {
-        gs_GameTextIsFadingIn[style][MAX_PLAYERS] = true;
-        OnFadeInGameText(MAX_PLAYERS, style, 0, 0, 0);
+        #if defined GTP_DISABLE_FADE
+            TextDrawShowForAll(gs_GameTextStyle[style]);
+        #else
+            gs_GameTextIsFadingIn[style][MAX_PLAYERS] = true;
+            OnFadeInGameText(MAX_PLAYERS, style, 0, 0, 0);
+        #endif
     }
 
     if (time > 0)
