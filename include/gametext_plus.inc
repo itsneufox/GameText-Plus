@@ -96,8 +96,6 @@
 #define     FADE_INTERVAL           50
 #define     FADE_ALPHA_STEP         0x12
 
-#define     GTP_ALPHA_FIX_OFFSET    0x5D
-
 static
     Text:gs_GameTextStyle[MAX_GAMETEXT_STYLE + 1],
     PlayerText:gs_PlayerGameTextStyle[MAX_PLAYERS][MAX_GAMETEXT_STYLE + 1],
@@ -221,9 +219,10 @@ static stock GTP_FixAlphaColour(colour)
     new alpha = colour & 0xFF;
     if (!alpha) return colour;
 
-    alpha += GTP_ALPHA_FIX_OFFSET;
-    if (alpha > 0xFF) alpha = 0xFF;
-    return (colour & ~0xFF) | alpha;
+    new Float:n = float(alpha) / 255.0;
+    new fixed = floatround(n * (2.0 - n) * 255.0);
+    if (fixed > 0xFF) fixed = 0xFF;
+    return (colour & ~0xFF) | fixed;
 }
 
 /*
