@@ -97,11 +97,6 @@
 #define     FADE_INTERVAL           50
 #define     FADE_ALPHA_STEP         0x12
 
-#define     GTP_LEGACY_BG_ALPHA     0xAA
-#define     GTP_FIXED_BG_ALPHA      0xFF
-#define     GTP_LEGACY_BOX_ALPHA    0x80
-#define     GTP_FIXED_BOX_ALPHA     0xDD
-
 //==========================================================================
 //                              DATA STRUCTURES
 //==========================================================================
@@ -183,6 +178,7 @@ static
     gs_GameTextOriginalBoxColor[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1],
     bool:gs_GameTextIsFadingOut[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1],
     bool:gs_GameTextIsFadingIn[MAX_GAMETEXT_STYLE + 1][MAX_PLAYERS + 1],
+    bool:gs_PlayerGameTextStyleCreated[MAX_PLAYERS][MAX_GAMETEXT_STYLE + 1],
     bool:gs_GameTextNeedsAlphaFix[MAX_PLAYERS]
 ;
 
@@ -289,27 +285,15 @@ native ORIG_GameTextForAll(const string[], time, style) = GameTextForAll;
 //                              CORE FUNCTIONS
 //==========================================================================
 
-/*
- * Converts known legacy alpha values to newer client equivalents
- * @param alpha - Alpha channel value (0-255)
- */
-static stock GTP_FixLegacyAlphaValue(alpha)
+static stock GTP_FixAlphaColour(colour)
 {
-    switch (alpha)
-    {
-        case GTP_LEGACY_BG_ALPHA: return GTP_FIXED_BG_ALPHA;
-        case GTP_LEGACY_BOX_ALPHA: return GTP_FIXED_BOX_ALPHA;
-    }
-    return alpha;
-}
+    new alpha = colour & 0xFF;
+    if (!alpha) return colour;
 
-/*
- * Updates only the alpha channel in a color if it matches a legacy value
- * @param colour - RGBA color value
- */
-static stock GTP_FixLegacyAlphaColour(colour)
-{
-    return (colour & ~0xFF) | GTP_FixLegacyAlphaValue(colour & 0xFF);
+    new Float:n = float(alpha) / 255.0;
+    new fixed = floatround(n * (2.0 - n) * 255.0);
+    if (fixed > 0xFF) fixed = 0xFF;
+    return (colour & ~0xFF) | fixed;
 }
 
 /*
@@ -322,7 +306,7 @@ static stock GTP_ApplyPlayerAlphaFix(playerid, PlayerText:text)
     if (!gs_GameTextNeedsAlphaFix[playerid]) return false;
 
     new colour = PlayerTextDrawGetBackgroundCol(playerid, text);
-    new fixed = GTP_FixLegacyAlphaColour(colour);
+    new fixed = GTP_FixAlphaColour(colour);
     if (fixed != colour)
     {
         #if !defined _INC_open_mp
@@ -332,7 +316,7 @@ static stock GTP_ApplyPlayerAlphaFix(playerid, PlayerText:text)
     }
 
     colour = PlayerTextDrawGetBoxColour(playerid, text);
-    fixed = GTP_FixLegacyAlphaColour(colour);
+    fixed = GTP_FixAlphaColour(colour);
     if (fixed != colour)
     {
         #if !defined _INC_open_mp
@@ -348,13 +332,15 @@ static stock GTP_ApplyPlayerAlphaFix(playerid, PlayerText:text)
  * Creates TextDraw styles either globally or for a specific player
  * @param playerid - INVALID_PLAYER_ID for global styles, player ID for player-specific styles
  */
-static stock GameTextEx(playerid)
+static stock GameTextEx(playerid, styleid)
 {
+    new EMPTY_STRING[2] = " ";
+
     if (playerid == INVALID_PLAYER_ID)
     {
         for (new style = MIN_GAMETEXT_STYLE, Text:t; style <= MAX_GAMETEXT_STYLE; style++)
         {
-            gs_GameTextStyle[style] = TextDrawCreate(gs_StyleList[style][e_pos][0], gs_StyleList[style][e_pos][1], " ");
+            gs_GameTextStyle[style] = TextDrawCreate(gs_StyleList[style][e_pos][0], gs_StyleList[style][e_pos][1], EMPTY_STRING);
             t = gs_GameTextStyle[style];
 
             TextDrawLetterSize(t, gs_StyleList[style][e_lettersize][0], gs_StyleList[style][e_lettersize][1]);
@@ -378,31 +364,94 @@ static stock GameTextEx(playerid)
     }
     else
     {
-        for (new style = MIN_GAMETEXT_STYLE, PlayerText:pt; style <= MAX_GAMETEXT_STYLE; style++)
-        {
-            gs_PlayerGameTextStyle[playerid][style] = CreatePlayerTextDraw(playerid, gs_StyleList[style][e_pos][0], gs_StyleList[style][e_pos][1], " ");
-            pt = gs_PlayerGameTextStyle[playerid][style];
+        if (!(MIN_GAMETEXT_STYLE <= styleid <= MAX_GAMETEXT_STYLE)) return false;
 
-            PlayerTextDrawLetterSize(playerid, pt, gs_StyleList[style][e_lettersize][0], gs_StyleList[style][e_lettersize][1]);
-            PlayerTextDrawAlignment(playerid, pt, gs_StyleList[style][e_alignment]);
-            #if !defined _INC_open_mp
-                PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, gs_StyleList[style][e_color]));
-                PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundCol(playerid, pt, gs_StyleList[style][e_bgalpha]));
-                PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, gs_StyleList[style][e_boxalpha]));
-            #else
-                PlayerTextDrawColour(playerid, pt, gs_StyleList[style][e_color]);
-                PlayerTextDrawBackgroundColour(playerid, pt, gs_StyleList[style][e_bgalpha]);
-                PlayerTextDrawBoxColour(playerid, pt, gs_StyleList[style][e_boxalpha]);
-            #endif
-            PlayerTextDrawSetShadow(playerid, pt, gs_StyleList[style][e_shadow]);
-            PlayerTextDrawSetOutline(playerid, pt, gs_StyleList[style][e_outline]);
-            PlayerTextDrawFont(playerid, pt, gs_StyleList[style][e_font]);
-            PlayerTextDrawSetProportional(playerid, pt, gs_StyleList[style][e_proportional]);
-            PlayerTextDrawTextSize(playerid, pt, gs_StyleList[style][e_textsize][0], gs_StyleList[style][e_textsize][1]);
-            PlayerTextDrawUseBox(playerid, pt, true);
-        }
+        gs_PlayerGameTextStyle[playerid][styleid] = CreatePlayerTextDraw(playerid, gs_StyleList[styleid][e_pos][0], gs_StyleList[styleid][e_pos][1], EMPTY_STRING);
+        new PlayerText:pt = gs_PlayerGameTextStyle[playerid][styleid];
+
+        PlayerTextDrawLetterSize(playerid, pt, gs_StyleList[styleid][e_lettersize][0], gs_StyleList[styleid][e_lettersize][1]);
+        PlayerTextDrawAlignment(playerid, pt, gs_StyleList[styleid][e_alignment]);
+        #if !defined _INC_open_mp
+            PlayerTextDrawColour(playerid, pt, SavePlayerTextDrawColour(playerid, pt, gs_StyleList[styleid][e_color]));
+            PlayerTextDrawBackgroundColour(playerid, pt, SavePlayerTextDrawBackgroundCol(playerid, pt, gs_StyleList[styleid][e_bgalpha]));
+            PlayerTextDrawBoxColour(playerid, pt, SavePlayerTextDrawBoxColour(playerid, pt, gs_StyleList[styleid][e_boxalpha]));
+        #else
+            PlayerTextDrawColour(playerid, pt, gs_StyleList[styleid][e_color]);
+            PlayerTextDrawBackgroundColour(playerid, pt, gs_StyleList[styleid][e_bgalpha]);
+            PlayerTextDrawBoxColour(playerid, pt, gs_StyleList[styleid][e_boxalpha]);
+        #endif
+        PlayerTextDrawSetShadow(playerid, pt, gs_StyleList[styleid][e_shadow]);
+        PlayerTextDrawSetOutline(playerid, pt, gs_StyleList[styleid][e_outline]);
+        PlayerTextDrawFont(playerid, pt, gs_StyleList[styleid][e_font]);
+        PlayerTextDrawSetProportional(playerid, pt, gs_StyleList[styleid][e_proportional]);
+        PlayerTextDrawTextSize(playerid, pt, gs_StyleList[styleid][e_textsize][0], gs_StyleList[styleid][e_textsize][1]);
+        PlayerTextDrawUseBox(playerid, pt, true);
+
+        gs_PlayerGameTextStyleCreated[playerid][styleid] = true;
     }
     return true;
+}
+
+static stock GTP_DestroyPlayerGameTextStyle(playerid, styleid)
+{
+    if (!gs_PlayerGameTextStyleCreated[playerid][styleid]) return false;
+
+    PlayerTextDrawDestroy(playerid, gs_PlayerGameTextStyle[playerid][styleid]);
+    gs_PlayerGameTextStyleCreated[playerid][styleid] = false;
+    return true;
+}
+
+static stock GTP_StopPlayerGameTextTimers(playerid, styleid)
+{
+    if (gs_GameTextTimer[styleid][playerid])
+    {
+        KillTimer(gs_GameTextTimer[styleid][playerid]);
+        gs_GameTextTimer[styleid][playerid] = 0;
+    }
+
+    if (gs_GameTextFadeInTimer[styleid][playerid])
+    {
+        KillTimer(gs_GameTextFadeInTimer[styleid][playerid]);
+        gs_GameTextFadeInTimer[styleid][playerid] = 0;
+    }
+
+    if (gs_GameTextFadeOutTimer[styleid][playerid])
+    {
+        KillTimer(gs_GameTextFadeOutTimer[styleid][playerid]);
+        gs_GameTextFadeOutTimer[styleid][playerid] = 0;
+    }
+
+    gs_GameTextIsFadingOut[styleid][playerid] = false;
+    gs_GameTextIsFadingIn[styleid][playerid] = false;
+    return true;
+}
+
+stock GTP_ClearGameTextForPlayer(playerid, styleid = -1)
+{
+    if (!IsPlayerConnected(playerid)) return false;
+
+    if (styleid == -1)
+    {
+        new cleared;
+        for (new style = MIN_GAMETEXT_STYLE; style <= MAX_GAMETEXT_STYLE; style++)
+        {
+            GTP_StopPlayerGameTextTimers(playerid, style);
+            if (gs_PlayerGameTextStyleCreated[playerid][style])
+            {
+                PlayerTextDrawHide(playerid, gs_PlayerGameTextStyle[playerid][style]);
+                cleared += GTP_DestroyPlayerGameTextStyle(playerid, style);
+            }
+        }
+        return cleared > 0;
+    }
+
+    if (!(MIN_GAMETEXT_STYLE <= styleid <= MAX_GAMETEXT_STYLE)) return false;
+
+    GTP_StopPlayerGameTextTimers(playerid, styleid);
+    if (!gs_PlayerGameTextStyleCreated[playerid][styleid]) return false;
+
+    PlayerTextDrawHide(playerid, gs_PlayerGameTextStyle[playerid][styleid]);
+    return GTP_DestroyPlayerGameTextStyle(playerid, styleid);
 }
 
 /*
@@ -413,8 +462,7 @@ static stock GameTextEx(playerid)
 forward OnHideGameText(playerid, styleid);
 public OnHideGameText(playerid, styleid)
 {
-    if (!gs_StyleList[styleid][e_fadeout])
-    {
+    #if defined GTP_DISABLE_FADE
         if (playerid == MAX_PLAYERS)
         {
             TextDrawHideForAll(gs_GameTextStyle[styleid]);
@@ -424,34 +472,39 @@ public OnHideGameText(playerid, styleid)
         {
             PlayerTextDrawHide(playerid, gs_PlayerGameTextStyle[playerid][styleid]);
             gs_GameTextTimer[styleid][playerid] = 0;
+            GTP_DestroyPlayerGameTextStyle(playerid, styleid);
         }
         return 1;
-    }
-
-    if (!gs_GameTextIsFadingOut[styleid][playerid])
-    {
-        if (playerid == MAX_PLAYERS)
+    #else
+        if (gs_StyleList[styleid][e_fadeout])
         {
-            gs_GameTextOriginalColor[styleid][MAX_PLAYERS] = TextDrawGetColour(gs_GameTextStyle[styleid]);
-            gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] = TextDrawGetBackgroundColour(gs_GameTextStyle[styleid]);
-            gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] = TextDrawGetBoxColour(gs_GameTextStyle[styleid]);
-        }
-        else
-        {
-            gs_GameTextOriginalColor[styleid][playerid] = PlayerTextDrawGetColour(playerid, gs_PlayerGameTextStyle[playerid][styleid]);
-            gs_GameTextOriginalBGColor[styleid][playerid] = PlayerTextDrawGetBackgroundCol(playerid, gs_PlayerGameTextStyle[playerid][styleid]);
-            gs_GameTextOriginalBoxColor[styleid][playerid] = PlayerTextDrawGetBoxColour(playerid, gs_PlayerGameTextStyle[playerid][styleid]);
-        }
-        gs_GameTextIsFadingOut[styleid][playerid] = true;
-    }
+            if (!gs_GameTextIsFadingOut[styleid][playerid])
+            {
+                if (playerid == MAX_PLAYERS)
+                {
+                    gs_GameTextOriginalColor[styleid][MAX_PLAYERS] = TextDrawGetColour(gs_GameTextStyle[styleid]);
+                    gs_GameTextOriginalBGColor[styleid][MAX_PLAYERS] = TextDrawGetBackgroundColour(gs_GameTextStyle[styleid]);
+                    gs_GameTextOriginalBoxColor[styleid][MAX_PLAYERS] = TextDrawGetBoxColour(gs_GameTextStyle[styleid]);
+                }
+                else
+                {
+                    PlayerTextDrawColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], gs_GameTextOriginalColor[styleid][playerid]);
+                    PlayerTextDrawBackgroundColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], gs_GameTextOriginalBGColor[styleid][playerid]);
+                    PlayerTextDrawBoxColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], gs_GameTextOriginalBoxColor[styleid][playerid]);
+                }
+                gs_GameTextIsFadingOut[styleid][playerid] = true;
+            }
 
-    OnFadeOutGameText(playerid, styleid,
-        gs_GameTextOriginalColor[styleid][playerid] & 0xFF,
-        gs_GameTextOriginalBGColor[styleid][playerid] & 0xFF,
-        gs_GameTextOriginalBoxColor[styleid][playerid] & 0xFF
-    );
+            OnFadeOutGameText(playerid, styleid,
+                gs_GameTextOriginalColor[styleid][playerid] & 0xFF,
+                gs_GameTextOriginalBGColor[styleid][playerid] & 0xFF,
+                gs_GameTextOriginalBoxColor[styleid][playerid] & 0xFF
+            );
 
-    return 1;
+            gs_GameTextTimer[styleid][playerid] = 0;
+            return 1;
+        }
+    #endif
 }
 
 /*
@@ -471,7 +524,7 @@ static stock OnDestroyGameText(playerid)
     {
         for (new style = MIN_GAMETEXT_STYLE; style <= MAX_GAMETEXT_STYLE; style++)
         {
-            PlayerTextDrawDestroy(playerid, gs_PlayerGameTextStyle[playerid][style]);
+            GTP_DestroyPlayerGameTextStyle(playerid, style);
         }
     }
     return true;
@@ -540,22 +593,11 @@ stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
         #pragma unused temp_string
     #endif
 
-    if (gs_GameTextTimer[style][playerid])
-    {
-        KillTimer(gs_GameTextTimer[style][playerid]);
-        gs_GameTextTimer[style][playerid] = 0;
-    }
+    GTP_StopPlayerGameTextTimers(playerid, style);
 
-    if (gs_GameTextFadeInTimer[style][playerid])
+    if (!gs_PlayerGameTextStyleCreated[playerid][style] && !GameTextEx(playerid, style))
     {
-        KillTimer(gs_GameTextFadeInTimer[style][playerid]);
-        gs_GameTextFadeInTimer[style][playerid] = 0;
-    }
-
-    if (gs_GameTextFadeOutTimer[style][playerid])
-    {
-        KillTimer(gs_GameTextFadeOutTimer[style][playerid]);
-        gs_GameTextFadeOutTimer[style][playerid] = 0;
+        return false;
     }
 
     GTP_ApplyPlayerAlphaFix(playerid, gs_PlayerGameTextStyle[playerid][style]);
@@ -611,14 +653,18 @@ stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
     }
     else
     {
-        gs_GameTextOriginalColor[style][playerid] = PlayerTextDrawGetColour(playerid, gs_PlayerGameTextStyle[playerid][style]);
-        gs_GameTextOriginalBGColor[style][playerid] = PlayerTextDrawGetBackgroundCol(playerid, gs_PlayerGameTextStyle[playerid][style]);
-        gs_GameTextOriginalBoxColor[style][playerid] = PlayerTextDrawGetBoxColour(playerid, gs_PlayerGameTextStyle[playerid][style]);
+        #if defined GTP_DISABLE_FADE
+            PlayerTextDrawShow(playerid, gs_PlayerGameTextStyle[playerid][style]);
+        #else
+            gs_GameTextOriginalColor[style][playerid] = PlayerTextDrawGetColour(playerid, gs_PlayerGameTextStyle[playerid][style]);
+            gs_GameTextOriginalBGColor[style][playerid] = PlayerTextDrawGetBackgroundCol(playerid, gs_PlayerGameTextStyle[playerid][style]);
+            gs_GameTextOriginalBoxColor[style][playerid] = PlayerTextDrawGetBoxColour(playerid, gs_PlayerGameTextStyle[playerid][style]);
 
-        gs_GameTextIsFadingOut[style][playerid] = false;
-        gs_GameTextIsFadingIn[style][playerid] = true;
+            gs_GameTextIsFadingOut[style][playerid] = false;
+            gs_GameTextIsFadingIn[style][playerid] = true;
 
-        OnFadeInGameText(playerid, style, 0, 0, 0);
+            OnFadeInGameText(playerid, style, 0, 0, 0);
+        #endif
     }
 
     if (time > 0)
@@ -706,6 +752,9 @@ stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
         KillTimer(gs_GameTextFadeOutTimer[style][MAX_PLAYERS]);
         gs_GameTextFadeOutTimer[style][MAX_PLAYERS] = 0;
     }
+
+    gs_GameTextIsFadingOut[style][MAX_PLAYERS] = false;
+    gs_GameTextIsFadingIn[style][MAX_PLAYERS] = false;
 
     for (new playerid; playerid < MAX_PLAYERS; playerid++)
     {
@@ -810,14 +859,18 @@ stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
     }
     else
     {
-        gs_GameTextOriginalColor[style][MAX_PLAYERS] = TextDrawGetColour(gs_GameTextStyle[style]);
-        gs_GameTextOriginalBGColor[style][MAX_PLAYERS] = TextDrawGetBackgroundColour(gs_GameTextStyle[style]);
-        gs_GameTextOriginalBoxColor[style][MAX_PLAYERS] = TextDrawGetBoxColour(gs_GameTextStyle[style]);
+        #if defined GTP_DISABLE_FADE
+            TextDrawShowForAll(gs_GameTextStyle[style]);
+        #else
+            gs_GameTextOriginalColor[style][MAX_PLAYERS] = TextDrawGetColour(gs_GameTextStyle[style]);
+            gs_GameTextOriginalBGColor[style][MAX_PLAYERS] = TextDrawGetBackgroundColour(gs_GameTextStyle[style]);
+            gs_GameTextOriginalBoxColor[style][MAX_PLAYERS] = TextDrawGetBoxColour(gs_GameTextStyle[style]);
 
-        gs_GameTextIsFadingOut[style][MAX_PLAYERS] = false;
-        gs_GameTextIsFadingIn[style][MAX_PLAYERS] = true;
+            gs_GameTextIsFadingOut[style][MAX_PLAYERS] = false;
+            gs_GameTextIsFadingIn[style][MAX_PLAYERS] = true;
 
-        OnFadeInGameText(MAX_PLAYERS, style, 0, 0, 0);
+            OnFadeInGameText(MAX_PLAYERS, style, 0, 0, 0);
+        #endif
     }
 
     if (time > 0)
@@ -969,6 +1022,7 @@ public OnFadeOutGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, 
                 PlayerTextDrawBoxColour(playerid, gs_PlayerGameTextStyle[playerid][styleid], (gs_GameTextOriginalBoxColor[styleid][playerid] & ~0xFF) | origBoxAlpha);
             }
             PlayerTextDrawHide(playerid, gs_PlayerGameTextStyle[playerid][styleid]);
+            GTP_DestroyPlayerGameTextStyle(playerid, styleid);
         }
 
         gs_GameTextIsFadingOut[styleid][playerid] = false;
@@ -989,10 +1043,8 @@ public OnFadeOutGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, 
 
 public OnPlayerConnect(playerid)
 {
-    GameTextEx(playerid);
-
     new version[24];
-    gs_GameTextNeedsAlphaFix[playerid] = false;
+    gs_GameTextNeedsAlphaFix[playerid] = true;
     if (GetPlayerVersion(playerid, version, sizeof(version)))
     {
         gs_GameTextNeedsAlphaFix[playerid] =
@@ -1023,18 +1075,7 @@ public OnPlayerDisconnect(playerid, reason)
 
     for (new style = MIN_GAMETEXT_STYLE; style <= MAX_GAMETEXT_STYLE; style++)
     {
-        if (gs_GameTextFadeOutTimer[style][playerid])
-        {
-            KillTimer(gs_GameTextFadeOutTimer[style][playerid]);
-            gs_GameTextFadeOutTimer[style][playerid] = 0;
-        }
-        if (gs_GameTextFadeInTimer[style][playerid])
-        {
-            KillTimer(gs_GameTextFadeInTimer[style][playerid]);
-            gs_GameTextFadeInTimer[style][playerid] = 0;
-        }
-        gs_GameTextIsFadingOut[style][playerid] = false;
-        gs_GameTextIsFadingIn[style][playerid] = false;
+        GTP_StopPlayerGameTextTimers(playerid, style);
     }
 
     OnDestroyGameText(playerid);
@@ -1057,7 +1098,7 @@ public OnPlayerDisconnect(playerid, reason)
 
 public OnGameModeInit()
 {
-    GameTextEx(INVALID_PLAYER_ID);
+    GameTextEx(INVALID_PLAYER_ID, MIN_GAMETEXT_STYLE);
 
     #if defined GTP_OnGameModeInit
         return GTP_OnGameModeInit();
