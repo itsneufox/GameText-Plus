@@ -287,7 +287,7 @@ native ORIG_GameTextForAll(const string[], time, style) = GameTextForAll;
 
 /*
  * Adjusts the alpha channel of a color with a compensation curve
- * so that old clients render it like 0.3.7-R3 and newer clients
+ * so that 0.3.7-R3 and newer clients render it like old clients
  * @param colour - RGBA color value
  */
 static stock GTP_FixAlphaColour(colour)
@@ -391,6 +391,7 @@ static stock GameTextEx(playerid, styleid)
     PlayerTextDrawTextSize(playerid, pt, gs_StyleList[styleid][e_textsize][0], gs_StyleList[styleid][e_textsize][1]);
     PlayerTextDrawUseBox(playerid, pt, true);
 
+    GTP_ApplyPlayerAlphaFix(playerid, pt);
     gs_PlayerGameTextStyleCreated[playerid][styleid] = true;
     return true;
 }
@@ -624,7 +625,6 @@ stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
     }
 
     GTP_StopPlayerGameTextTimers(playerid, style);
-    GTP_ApplyPlayerAlphaFix(playerid, gs_PlayerGameTextStyle[playerid][style]);
 
     if (gs_StyleList[style][e_fadein] || gs_StyleList[style][e_fadeout])
     {
