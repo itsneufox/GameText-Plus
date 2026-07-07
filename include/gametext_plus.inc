@@ -206,12 +206,12 @@ native ORIG_GameTextForAll(const string[], time, style) = GameTextForAll;
  */
 #if !defined _INC_open_mp
     static
-        gs_TextDrawColors[MAX_TEXT_DRAWS],
-        gs_TextDrawBGColors[MAX_TEXT_DRAWS],
-        gs_TextDrawBoxColors[MAX_TEXT_DRAWS],
-        gs_PlayerTextDrawColors[MAX_PLAYERS][MAX_PLAYER_TEXT_DRAWS],
-        gs_PlayerTextDrawBGColors[MAX_PLAYERS][MAX_PLAYER_TEXT_DRAWS],
-        gs_PlayerTextDrawBoxColors[MAX_PLAYERS][MAX_PLAYER_TEXT_DRAWS]
+        gs_TextDrawColors[_:MAX_TEXT_DRAWS],
+        gs_TextDrawBGColors[_:MAX_TEXT_DRAWS],
+        gs_TextDrawBoxColors[_:MAX_TEXT_DRAWS],
+        gs_PlayerTextDrawColors[MAX_PLAYERS][_:MAX_PLAYER_TEXT_DRAWS],
+        gs_PlayerTextDrawBGColors[MAX_PLAYERS][_:MAX_PLAYER_TEXT_DRAWS],
+        gs_PlayerTextDrawBoxColors[MAX_PLAYERS][_:MAX_PLAYER_TEXT_DRAWS]
     ;
 
     stock SaveTextDrawColour(Text:text, color)
@@ -285,6 +285,11 @@ native ORIG_GameTextForAll(const string[], time, style) = GameTextForAll;
 //                              CORE FUNCTIONS
 //==========================================================================
 
+/*
+ * Adjusts the alpha channel of a color with a compensation curve
+ * so that old clients render it like 0.3.7-R3 and newer clients
+ * @param colour - RGBA color value
+ */
 static stock GTP_FixAlphaColour(colour)
 {
     new alpha = colour & 0xFF;
@@ -331,6 +336,7 @@ static stock GTP_ApplyPlayerAlphaFix(playerid, PlayerText:text)
 /*
  * Creates TextDraw styles either globally or for a specific player
  * @param playerid - INVALID_PLAYER_ID for global styles, player ID for player-specific styles
+ * @param styleid - Style ID to create for the player (ignored for global styles)
  */
 static stock GameTextEx(playerid, styleid)
 {
@@ -389,6 +395,11 @@ static stock GameTextEx(playerid, styleid)
     return true;
 }
 
+/*
+ * Destroys a lazily created player textdraw style
+ * @param playerid - Target player
+ * @param styleid - Style ID of the gametext to destroy
+ */
 static stock GTP_DestroyPlayerGameTextStyle(playerid, styleid)
 {
     if (!gs_PlayerGameTextStyleCreated[playerid][styleid]) return false;
@@ -398,6 +409,11 @@ static stock GTP_DestroyPlayerGameTextStyle(playerid, styleid)
     return true;
 }
 
+/*
+ * Stops all running gametext timers of a style for a specific player
+ * @param playerid - Target player
+ * @param styleid - Style ID of the gametext
+ */
 static stock GTP_StopPlayerGameTextTimers(playerid, styleid)
 {
     if (gs_GameTextTimer[styleid][playerid])
@@ -423,6 +439,11 @@ static stock GTP_StopPlayerGameTextTimers(playerid, styleid)
     return true;
 }
 
+/*
+ * Hides and destroys displayed gametext for a specific player
+ * @param playerid - Target player
+ * @param styleid - Style ID to clear or -1 for all styles
+ */
 stock GTP_ClearGameTextForPlayer(playerid, styleid = -1)
 {
     if (!IsPlayerConnected(playerid)) return false;
