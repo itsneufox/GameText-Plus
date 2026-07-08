@@ -600,7 +600,8 @@ stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
     }
     else
     {
-        format(string, sizeof(string), "%s", text);
+        string[0] = EOS;
+        strcat(string, text, string_size);
     }
 
     #if !defined OVERRIDE_NATIVE_GAMETEXT
@@ -703,7 +704,8 @@ stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
     }
     else
     {
-        format(string, sizeof(string), "%s", text);
+        string[0] = EOS;
+        strcat(string, text, string_size);
     }
 
     #if !defined OVERRIDE_NATIVE_GAMETEXT
