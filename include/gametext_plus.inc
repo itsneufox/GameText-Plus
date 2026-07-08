@@ -412,7 +412,7 @@ static stock GTP_DestroyPlayerGameTextStyle(playerid, styleid)
 
 /*
  * Stops all running gametext timers of a style for a specific player
- * @param playerid - Target player
+ * @param playerid - Target player (MAX_PLAYERS for global gametexts)
  * @param styleid - Style ID of the gametext
  */
 static stock GTP_StopPlayerGameTextTimers(playerid, styleid)
@@ -750,24 +750,6 @@ stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
         #pragma unused temp_string
     #endif
 
-    if (gs_GameTextTimer[style][MAX_PLAYERS])
-    {
-        KillTimer(gs_GameTextTimer[style][MAX_PLAYERS]);
-        gs_GameTextTimer[style][MAX_PLAYERS] = 0;
-    }
-
-    if (gs_GameTextFadeInTimer[style][MAX_PLAYERS])
-    {
-        KillTimer(gs_GameTextFadeInTimer[style][MAX_PLAYERS]);
-        gs_GameTextFadeInTimer[style][MAX_PLAYERS] = 0;
-    }
-
-    if (gs_GameTextFadeOutTimer[style][MAX_PLAYERS])
-    {
-        KillTimer(gs_GameTextFadeOutTimer[style][MAX_PLAYERS]);
-        gs_GameTextFadeOutTimer[style][MAX_PLAYERS] = 0;
-    }
-
     if (gs_GameTextIsFadingIn[style][MAX_PLAYERS] || gs_GameTextIsFadingOut[style][MAX_PLAYERS])
     {
         TextDrawColour(gs_GameTextStyle[style], gs_GameTextOriginalColor[style][MAX_PLAYERS]);
@@ -775,8 +757,7 @@ stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
         TextDrawBoxColour(gs_GameTextStyle[style], gs_GameTextOriginalBoxColor[style][MAX_PLAYERS]);
     }
 
-    gs_GameTextIsFadingOut[style][MAX_PLAYERS] = false;
-    gs_GameTextIsFadingIn[style][MAX_PLAYERS] = false;
+    GTP_StopPlayerGameTextTimers(MAX_PLAYERS, style);
 
     for (new playerid; playerid < MAX_PLAYERS; playerid++)
     {
