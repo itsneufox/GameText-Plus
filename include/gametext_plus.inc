@@ -6,7 +6,7 @@
  *  |   |_| ||   _   || ||_|| ||   |___   |   |  |   |___ |   _   |  |   |
  *  |_______||__| |__||_|   |_||_______|  |___|  |_______||__| |__|  |___|
  *
- *  GameText+ created and maintained by itsneufox (v1.2.0)
+ *  GameText+ created and maintained by itsneufox (v1.3.0)
 
  *  Textdraws originally created by Y_Less for fixes.inc
  *  Fader functionality created by edgyaf
