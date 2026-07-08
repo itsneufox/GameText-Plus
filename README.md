@@ -32,6 +32,12 @@ It introduces enhanced styling options, improved functionality, and seamless int
 #include <gametext_plus>
 ```
 
+5. OPTIONAL: If you want to disable fade-in and fade-out effects, add the following line:
+```pawn
+#define GTP_DISABLE_FADE // This line should be added before including GameText+!
+#include <gametext_plus>
+```
+
 ## Compatibility
 
 - **SA-MP**: Fully compatible
@@ -97,4 +103,3 @@ The package includes a comprehensive testing script:
 ## License
 
 This project is licensed under the MIT License, making it freely available for use in both personal and commercial projects. See the LICENSE file for full details.
-
