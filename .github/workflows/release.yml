@@ -122,3 +122,5 @@ jobs:
           else
             gh release create "${tag}" "${zip_asset}" "${tar_asset}" --title "${version}" --generate-notes
           fi
+
+          gh release edit "${tag}" --draft=false
