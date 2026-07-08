@@ -1,0 +1,124 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+      - "V*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build release archives
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set release metadata
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          raw_tag="${GITHUB_REF_NAME}"
+          if [[ "${raw_tag}" == v* || "${raw_tag}" == V* ]]; then
+            version="v${raw_tag:1}"
+          else
+            version="v${raw_tag}"
+          fi
+
+          {
+            echo "tag=${raw_tag}"
+            echo "version=${version}"
+            echo "asset_name=GameText+${version}"
+          } >> "${GITHUB_OUTPUT}"
+
+      - name: Install sampctl
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          case "$(uname -m)" in
+            x86_64|amd64) arch="amd64" ;;
+            i386|i686) arch="386" ;;
+            aarch64|arm64) arch="arm64" ;;
+            armv7l) arch="armv7" ;;
+            *)
+              echo "Unsupported architecture: $(uname -m)"
+              exit 1
+              ;;
+          esac
+
+          mkdir -p /tmp/sampctl/download /tmp/sampctl/bin
+          gh release download --repo Southclaws/sampctl --pattern "sampctl_*_linux_${arch}.tar.gz" --dir /tmp/sampctl/download
+          tar -xzf /tmp/sampctl/download/sampctl_*_linux_${arch}.tar.gz -C /tmp/sampctl/bin
+          sudo install -m 0755 /tmp/sampctl/bin/sampctl /usr/local/bin/sampctl
+          sampctl version
+
+      - name: Build test script
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          sampctl ensure
+          sampctl build
+          test -f testing/omp/omp_test.amx
+
+      - name: Prepare package files
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          rm -rf package dist
+          mkdir -p package/testing/omp dist
+
+          cp -R include package/include
+          cp LICENSE README.md package/
+          cp testing/omp/omp_test.pwn package/testing/omp/
+          cp testing/omp/omp_test.amx package/testing/omp/
+
+      - name: Create archives
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          asset_name="${{ steps.meta.outputs.asset_name }}"
+
+          cd package
+
+          entries=(include LICENSE README.md testing)
+
+          python3 -m zipfile -c "../dist/${asset_name}.zip" "${entries[@]}"
+          tar -czf "../dist/${asset_name}.tar.gz" "${entries[@]}"
+
+      - name: Show archive contents
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python3 -m zipfile -l "dist/${{ steps.meta.outputs.asset_name }}.zip"
+          tar -tzf "dist/${{ steps.meta.outputs.asset_name }}.tar.gz"
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          tag="${{ steps.meta.outputs.tag }}"
+          version="${{ steps.meta.outputs.version }}"
+          zip_asset="dist/${{ steps.meta.outputs.asset_name }}.zip"
+          tar_asset="dist/${{ steps.meta.outputs.asset_name }}.tar.gz"
+
+          if gh release view "${tag}" >/dev/null 2>&1; then
+            gh release upload "${tag}" "${zip_asset}" "${tar_asset}" --clobber
+          else
+            gh release create "${tag}" "${zip_asset}" "${tar_asset}" --title "${version}" --generate-notes
+          fi

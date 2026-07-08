@@ -3,6 +3,11 @@
 	"repo": "GameText-Plus",
 	"entry": "testing/omp/omp_test.pwn",
 	"output": "testing/omp/omp_test.amx",
+	"build": {
+		"includes": [
+			"include"
+		]
+	},
 	"dependencies": [
 		"openmultiplayer/omp-stdlib"
 	],
