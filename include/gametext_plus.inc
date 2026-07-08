@@ -570,46 +570,44 @@ stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
     const static_args = 4;
     const args_diff = (3 - static_args) * 4; // format's static args end at index 3, current function's end at static_arg_count. Also * 4 because cells are 4 bytes
 
-    static args, temp_string[MAX_GAMETEXT_LENGTH];
-    const string_size = sizeof(temp_string);
+    static args, string[MAX_GAMETEXT_LENGTH];
+    const string_size = sizeof(string);
 
     args = numargs();
+
+    if (args > static_args)
+    {
+        while (--args >= 4)
+        {
+            #emit LCTRL 5
+            #emit LOAD.alt args
+            #emit SHL.C.alt 2
+            #emit ADD.C 12
+            #emit ADD
+            #emit LOAD.I
+            #emit PUSH.pri
+        }
+
+        #emit PUSH.S text
+        #emit PUSH.C string_size
+        #emit PUSH.C string
+        #emit LOAD.S.pri 8
+        #emit ADD.C args_diff
+        #emit PUSH.pri
+        #emit SYSREQ.C format
+        #emit LCTRL 5
+        #emit SCTRL 4
+    }
+    else
+    {
+        format(string, sizeof(string), "%s", text);
+    }
 
     #if !defined OVERRIDE_NATIVE_GAMETEXT
         if (style <= GAMETEXT_LEGACY)
         {
-            if (args > static_args)
-            {
-                while (--args >= 4)
-                {
-                    #emit LCTRL 5
-                    #emit LOAD.alt args
-                    #emit SHL.C.alt 2
-                    #emit ADD.C 12
-                    #emit ADD
-                    #emit LOAD.I
-                    #emit PUSH.pri
-                }
-
-                #emit PUSH.S text
-                #emit PUSH.C string_size
-                #emit PUSH.C temp_string
-                #emit LOAD.S.pri 8
-                #emit ADD.C args_diff
-                #emit PUSH.pri
-                #emit SYSREQ.C format
-                #emit LCTRL 5
-                #emit SCTRL 4
-
-                return ORIG_GameTextForPlayer(playerid, temp_string, time, style);
-            }
-            else
-            {
-                return ORIG_GameTextForPlayer(playerid, text, time, style);
-            }
+            return ORIG_GameTextForPlayer(playerid, string, time, style);
         }
-    #else
-        #pragma unused temp_string
     #endif
 
     if (!gs_PlayerGameTextStyleCreated[playerid][style] && !GameTextEx(playerid, style))
@@ -633,40 +631,7 @@ stock GTP_GameTextForPlayer(playerid, const text[], time, style, {Float, _}:...)
         gs_GameTextOriginalBoxColor[style][playerid] = PlayerTextDrawGetBoxColour(playerid, gs_PlayerGameTextStyle[playerid][style]);
     }
 
-    if (args > static_args)
-    {
-        static string[MAX_GAMETEXT_LENGTH];
-        const string_size = sizeof(string);
-
-        while (--args >= 4)
-        {
-            #emit LCTRL 5
-            #emit LOAD.alt args
-            #emit SHL.C.alt 2
-            #emit ADD.C 12
-            #emit ADD
-            #emit LOAD.I
-            #emit PUSH.pri
-        }
-
-        #emit PUSH.S text
-        #emit PUSH.C string_size
-        #emit PUSH.C string
-        #emit LOAD.S.pri 8
-        #emit ADD.C args_diff
-        #emit PUSH.pri
-        #emit SYSREQ.C format
-        #emit LCTRL 5
-        #emit SCTRL 4
-
-        PlayerTextDrawSetString(playerid, gs_PlayerGameTextStyle[playerid][style], string);
-    }
-    else
-    {
-        static string[MAX_GAMETEXT_LENGTH];
-        format(string, sizeof(string), "%s", text);
-        PlayerTextDrawSetString(playerid, gs_PlayerGameTextStyle[playerid][style], string);
-    }
+    PlayerTextDrawSetString(playerid, gs_PlayerGameTextStyle[playerid][style], string);
 
     if (!gs_StyleList[style][e_fadein])
     {
@@ -708,121 +673,13 @@ stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
     const static_args = 3;
     const args_diff = (3 - static_args) * 4; // format's static args end at index 3, current function's end at static_arg_count. Also * 4 because cells are 4 bytes
 
-    static args, temp_string[MAX_GAMETEXT_LENGTH];
-    const string_size = sizeof(temp_string);
+    static args, string[MAX_GAMETEXT_LENGTH];
+    const string_size = sizeof(string);
 
     args = numargs();
 
-    #if !defined OVERRIDE_NATIVE_GAMETEXT
-        if (style <= GAMETEXT_LEGACY)
-        {
-            if (args > static_args)
-            {
-                while (--args >= 3)
-                {
-                    #emit LCTRL 5
-                    #emit LOAD.alt args
-                    #emit SHL.C.alt 2
-                    #emit ADD.C 12
-                    #emit ADD
-                    #emit LOAD.I
-                    #emit PUSH.pri
-                }
-
-                #emit PUSH.S text
-                #emit PUSH.C string_size
-                #emit PUSH.C temp_string
-                #emit LOAD.S.pri 8
-                #emit ADD.C args_diff
-                #emit PUSH.pri
-                #emit SYSREQ.C format
-                #emit LCTRL 5
-                #emit SCTRL 4
-
-                return ORIG_GameTextForAll(temp_string, time, style);
-            }
-            else
-            {
-                return ORIG_GameTextForAll(text, time, style);
-            }
-        }
-    #else
-        #pragma unused temp_string
-    #endif
-
-    if (gs_GameTextIsFadingIn[style][MAX_PLAYERS] || gs_GameTextIsFadingOut[style][MAX_PLAYERS])
-    {
-        TextDrawColour(gs_GameTextStyle[style], gs_GameTextOriginalColor[style][MAX_PLAYERS]);
-        TextDrawBackgroundColour(gs_GameTextStyle[style], gs_GameTextOriginalBGColor[style][MAX_PLAYERS]);
-        TextDrawBoxColour(gs_GameTextStyle[style], gs_GameTextOriginalBoxColor[style][MAX_PLAYERS]);
-    }
-
-    GTP_StopPlayerGameTextTimers(MAX_PLAYERS, style);
-
-    for (new playerid; playerid < MAX_PLAYERS; playerid++)
-    {
-        if (!IsPlayerConnected(playerid) || !gs_GameTextNeedsAlphaFix[playerid]) continue;
-
-        TextDrawHideForAll(gs_GameTextStyle[style]);
-
-        if (args > static_args)
-        {
-            static string[MAX_GAMETEXT_LENGTH];
-            const string_size = sizeof(string);
-
-            while (--args >= 3)
-            {
-                #emit LCTRL 5
-                #emit LOAD.alt args
-                #emit SHL.C.alt 2
-                #emit ADD.C 12
-                #emit ADD
-                #emit LOAD.I
-                #emit PUSH.pri
-            }
-
-            #emit PUSH.S text
-            #emit PUSH.C string_size
-            #emit PUSH.C string
-            #emit LOAD.S.pri 8
-            #emit ADD.C args_diff
-            #emit PUSH.pri
-            #emit SYSREQ.C format
-            #emit LCTRL 5
-            #emit SCTRL 4
-
-            for (new i; i < MAX_PLAYERS; i++)
-            {
-                if (!IsPlayerConnected(i)) continue;
-                GTP_GameTextForPlayer(i, string, time, style);
-            }
-        }
-        else
-        {
-            static string[MAX_GAMETEXT_LENGTH];
-            format(string, sizeof(string), "%s", text);
-
-            for (new i; i < MAX_PLAYERS; i++)
-            {
-                if (!IsPlayerConnected(i)) continue;
-                GTP_GameTextForPlayer(i, string, time, style);
-            }
-        }
-        return true;
-    }
-
-    if (gs_StyleList[style][e_fadein] || gs_StyleList[style][e_fadeout])
-    {
-        gs_GameTextOriginalColor[style][MAX_PLAYERS] = TextDrawGetColour(gs_GameTextStyle[style]);
-        gs_GameTextOriginalBGColor[style][MAX_PLAYERS] = TextDrawGetBackgroundColour(gs_GameTextStyle[style]);
-        gs_GameTextOriginalBoxColor[style][MAX_PLAYERS] = TextDrawGetBoxColour(gs_GameTextStyle[style]);
-    }
-
     if (args > static_args)
     {
-        static string[MAX_GAMETEXT_LENGTH];
-        const string_size = sizeof(string);
-
         while (--args >= 3)
         {
             #emit LCTRL 5
@@ -843,15 +700,50 @@ stock GTP_GameTextForAll(const text[], time, style, {Float, _}:...)
         #emit SYSREQ.C format
         #emit LCTRL 5
         #emit SCTRL 4
-
-        TextDrawSetString(gs_GameTextStyle[style], string);
     }
     else
     {
-        static string[MAX_GAMETEXT_LENGTH];
         format(string, sizeof(string), "%s", text);
-        TextDrawSetString(gs_GameTextStyle[style], string);
     }
+
+    #if !defined OVERRIDE_NATIVE_GAMETEXT
+        if (style <= GAMETEXT_LEGACY)
+        {
+            return ORIG_GameTextForAll(string, time, style);
+        }
+    #endif
+
+    if (gs_GameTextIsFadingIn[style][MAX_PLAYERS] || gs_GameTextIsFadingOut[style][MAX_PLAYERS])
+    {
+        TextDrawColour(gs_GameTextStyle[style], gs_GameTextOriginalColor[style][MAX_PLAYERS]);
+        TextDrawBackgroundColour(gs_GameTextStyle[style], gs_GameTextOriginalBGColor[style][MAX_PLAYERS]);
+        TextDrawBoxColour(gs_GameTextStyle[style], gs_GameTextOriginalBoxColor[style][MAX_PLAYERS]);
+    }
+
+    GTP_StopPlayerGameTextTimers(MAX_PLAYERS, style);
+
+    for (new playerid; playerid < MAX_PLAYERS; playerid++)
+    {
+        if (!IsPlayerConnected(playerid) || !gs_GameTextNeedsAlphaFix[playerid]) continue;
+
+        TextDrawHideForAll(gs_GameTextStyle[style]);
+
+        for (new i; i < MAX_PLAYERS; i++)
+        {
+            if (!IsPlayerConnected(i)) continue;
+            GTP_GameTextForPlayer(i, string, time, style);
+        }
+        return true;
+    }
+
+    if (gs_StyleList[style][e_fadein] || gs_StyleList[style][e_fadeout])
+    {
+        gs_GameTextOriginalColor[style][MAX_PLAYERS] = TextDrawGetColour(gs_GameTextStyle[style]);
+        gs_GameTextOriginalBGColor[style][MAX_PLAYERS] = TextDrawGetBackgroundColour(gs_GameTextStyle[style]);
+        gs_GameTextOriginalBoxColor[style][MAX_PLAYERS] = TextDrawGetBoxColour(gs_GameTextStyle[style]);
+    }
+
+    TextDrawSetString(gs_GameTextStyle[style], string);
 
     if (!gs_StyleList[style][e_fadein])
     {
