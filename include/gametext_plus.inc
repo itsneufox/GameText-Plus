@@ -911,14 +911,17 @@ public OnFadeOutGameText(playerid, styleid, colourAlpha, backgroundColourAlpha, 
 
 public OnPlayerConnect(playerid)
 {
-    new version[24];
-    gs_GameTextNeedsAlphaFix[playerid] = true;
-    if (GetPlayerVersion(playerid, version, sizeof(version)))
+    if (!IsPlayerNPC(playerid))
     {
-        gs_GameTextNeedsAlphaFix[playerid] =
-            strcmp(version, "0.3.7") != 0 &&
-            strcmp(version, "0.3.7-R2") != 0
-        ;
+        new version[24];
+        gs_GameTextNeedsAlphaFix[playerid] = true;
+        if (GetPlayerVersion(playerid, version, sizeof(version)))
+        {
+            gs_GameTextNeedsAlphaFix[playerid] =
+                strcmp(version, "0.3.7") != 0 &&
+                strcmp(version, "0.3.7-R2") != 0
+            ;
+        }
     }
 
     #if defined GTP_OnPlayerConnect
